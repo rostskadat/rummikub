@@ -27,24 +27,6 @@ public abstract class TileSet extends ArrayList<Tile> {
 	}
 
     /**
-     * This method returns whether the {@link Tile} {@code tileToAdd} can be added to the {@code TileSet}
-     * 
-     * @param tileToAdd
-     *            the {@link Tile} to add
-     * @return whether the {@link Tile} {@code tileToAdd} can be added
-     */
-    public abstract boolean canAddToSet(Tile tileToAdd);
-
-    /**
-     * This method insert a tile to the correct spot in the set and returns the index of the position it was inserted at
-     * 
-     * @param tileToAdd
-     *            the {@link Tile} to add
-     * @return the index of the position it was inserted at
-     */
-    public abstract int addToSet(Tile tileToAdd);
-
-    /**
      * This method returns the score associated with this specific {@code TileSet}
      * 
      * @return the score of this {@code TileSet}

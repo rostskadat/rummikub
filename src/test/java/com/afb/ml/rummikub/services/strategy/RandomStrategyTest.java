@@ -1,6 +1,5 @@
 package com.afb.ml.rummikub.services.strategy;
 
-import static com.afb.ml.rummikub.services.strategy.StrategyUtilsTest.addTileRun;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,6 +31,9 @@ public class RandomStrategyTest extends AbstractUnitTest {
     @Autowired
     TableController tableController;
 
+	@Autowired
+	private StrategyHelper helper;
+	
     @Before
     public void before() {
         tableController.clearTable();
@@ -42,9 +44,9 @@ public class RandomStrategyTest extends AbstractUnitTest {
         Player player = new Player();
         Rack rack = player.getRack();
         checkPlayer(player, !STARTED, !PLAYED);
-        addTileRun(rack, 1, 3, TileColor.BLACK);
+        Utils.addTileRun(helper, rack, 1, 3, TileColor.BLACK);
         checkPlayer(player, !STARTED, !PLAYED);
-        addTileRun(rack, 5, 7, TileColor.BLACK);
+        Utils.addTileRun(helper, rack, 5, 7, TileColor.BLACK);
         checkPlayer(player, !STARTED, !PLAYED);
     }
 
@@ -53,11 +55,11 @@ public class RandomStrategyTest extends AbstractUnitTest {
         Player player = new Player();
         Rack rack = player.getRack();
         checkPlayer(player, !STARTED, !PLAYED);
-        addTileRun(rack, 1, 3, TileColor.BLACK);
+        Utils.addTileRun(helper, rack, 1, 3, TileColor.BLACK);
         checkPlayer(player, !STARTED, !PLAYED);
-        addTileRun(rack, 5, 7, TileColor.BLACK);
+        Utils.addTileRun(helper, rack, 5, 7, TileColor.BLACK);
         checkPlayer(player, !STARTED, !PLAYED);
-        TileRun run = addTileRun(rack, 10, 12, TileColor.BLACK);
+        TileRun run = Utils.addTileRun(helper, rack, 10, 12, TileColor.BLACK);
         checkPlayer(player, STARTED, PLAYED, run);
     }
 
@@ -66,18 +68,40 @@ public class RandomStrategyTest extends AbstractUnitTest {
         Player player = new Player();
         Rack rack = player.getRack();
         checkPlayer(player, !STARTED, !PLAYED);
-        TileRun run1 = addTileRun(rack, 1, 3, TileColor.BLACK);
+        TileRun run1 = Utils.addTileRun(helper, rack, 1, 3, TileColor.BLACK);
         checkPlayer(player, !STARTED, !PLAYED);
-        TileRun run2 = addTileRun(rack, 5, 7, TileColor.BLACK);
+        TileRun run2 = Utils.addTileRun(helper, rack, 5, 7, TileColor.BLACK);
         checkPlayer(player, !STARTED, !PLAYED);
-        TileRun run3 = addTileRun(rack, 10, 12, TileColor.BLACK);
+        TileRun run3 = Utils.addTileRun(helper, rack, 10, 12, TileColor.BLACK);
         checkPlayer(player, STARTED, PLAYED, run3);
         checkPlayer(player, STARTED, PLAYED, run1, run2, run3);
-        TileRun run5 = addTileRun(rack, 10, 11, TileColor.RED);
+        TileRun run5 = Utils.addTileRun(helper, rack, 10, 11, TileColor.RED);
         checkPlayer(player, STARTED, !PLAYED, run1, run2, run3);
         assertThat(rack.containsAll(run5), equalTo(true));
         assertThat(rack.size(), equalTo(run5.size() + 1));
+        TileRun run6 = Utils.addTileRun(helper, rack, 12, 12, TileColor.RED);
+        run5.addAll(run6);
+        checkPlayer(player, STARTED, PLAYED, run1, run2, run3, run5);
     }
+    
+    @Test
+    public void testGetInitialTileSets_04() {
+        Player player = new Player();
+        Rack rack = player.getRack();
+        TileRun run1 = Utils.addTileRun(helper, rack, 10, 12, TileColor.BLACK);
+        checkPlayer(player, STARTED, PLAYED, run1);
+        // Checking the shift run
+        TileRun run2 = Utils.addTileRun(helper, rack, 13, 13, TileColor.BLACK);
+        run1.addAll(run2);
+        checkPlayer(player, STARTED, PLAYED, run1);
+        TileRun run3 = Utils.addTileRun(helper, rack, 1, 5, TileColor.RED);
+        checkPlayer(player, STARTED, PLAYED, run1, run3);
+        // Checking the shift run
+        Utils.addTileRun(helper, rack, 3, 3, TileColor.RED);
+        TileRun expected1 = Utils.getTileRun(helper, 1, 3, TileColor.RED);
+        TileRun expected2 = Utils.getTileRun(helper, 3, 5, TileColor.RED);
+        checkPlayer(player, STARTED, PLAYED, run1, expected1, expected2);
+    }    
 
     private void checkPlayer(Player player, boolean started, boolean played) {
         boolean hasPlayed = strategy.play(player);
@@ -85,13 +109,13 @@ public class RandomStrategyTest extends AbstractUnitTest {
         assertThat(player.isStarted(), equalTo(started));
     }
 
-    private void checkPlayer(Player player, boolean started, boolean played, TileSet... sets) {
+    private void checkPlayer(Player player, boolean started, boolean played, TileSet... expectedSets) {
         checkPlayer(player, started, played);
         List<TileSet> tileSets = tableController.getTileSets();
         assertThat(tileSets, notNullValue());
-        assertThat(tileSets.size(), equalTo(sets.length));
-        for (TileSet set : sets) {
-            assertThat(tileSets.contains(set), equalTo(true));
+        assertThat(tileSets.size(), equalTo(expectedSets.length));
+        for (TileSet expectedSet : expectedSets) {
+            assertThat(tileSets.contains(expectedSet), equalTo(true));
         }
     }
 

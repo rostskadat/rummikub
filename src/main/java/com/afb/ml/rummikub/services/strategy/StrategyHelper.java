@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.afb.ml.rummikub.model.Rack;
 import com.afb.ml.rummikub.model.Tile;
+import com.afb.ml.rummikub.model.TileColor;
 import com.afb.ml.rummikub.model.TileGroup;
 import com.afb.ml.rummikub.model.TileRun;
 import com.afb.ml.rummikub.model.TileSet;
@@ -110,8 +111,8 @@ public class StrategyHelper {
         assert (index < rack.size());
 
         Tile tile = rack.get(index);
-        if (tileSet.canAddToSet(tile)) {
-            tileSet.addToSet(tile);
+        if (canAddToSet(tileSet, tile)) {
+            addToSet(tileSet, tile);
         }
         if (index == rack.size() - 1) {
             return;
@@ -120,6 +121,98 @@ public class StrategyHelper {
         addTileFromRackToTileSet(rack, index + 1, tileSet);
     }
 
+    /**
+     * This method returns whether the {@link Tile} {@code tileToAdd} can be added to the {@code TileSet}
+     * 
+     * @param tileToAdd
+     *            the {@link Tile} to add
+     * @return whether the {@link Tile} {@code tileToAdd} can be added
+     */
+    public boolean canAddToSet(TileSet tileSet, Tile tileToAdd) {
+    	return (tileSet instanceof TileGroup) ? canAddToSet((TileGroup) tileSet, tileToAdd) : canAddToSet((TileRun) tileSet, tileToAdd);
+    }
+    
+
+    private boolean canAddToSet(TileGroup group, Tile tileToAdd) {
+    	if (group.size() >= 4) {
+			return false;
+		}
+        if (tileToAdd.isJoker()) {
+            return !group.contains(tileToAdd);
+		}
+		TileColor colorToAdd = tileToAdd.getColor();
+		boolean seenTileColorToAdd = false;
+		int groupNumber = -1;
+		for (Tile tile : group) {
+			if (!tile.isJoker()) {
+				groupNumber = tile.getNumber();
+			}
+			if (colorToAdd.equals(tile.getColor())) {
+				seenTileColorToAdd = true;
+			}
+		}
+        return (tileToAdd.getNumber() == groupNumber && !seenTileColorToAdd);
+    }
+
+    private boolean canAddToSet(TileRun run, Tile tileToAdd) {
+        if (run.isEmpty()) {
+            return true;
+        }
+        // I can add any of the jocker once without constraints
+        if (tileToAdd.isJoker()) {
+            return !run.contains(tileToAdd);
+        }
+        TileColor tileSetColor = run.getColor();
+        Integer lowestBound = run.getLowestBound();
+        Integer upperBound = run.getUpperBound();
+
+        TileColor tileColor = tileToAdd.getColor();
+        int tileNumber = tileToAdd.getNumber();
+
+        // XXX: what happend in case of a jocker tiles?
+        return ((tileSetColor == null || tileSetColor == tileColor)
+                && (lowestBound == null || (lowestBound == tileNumber + 1) || (upperBound == tileNumber - 1)));
+    }
+
+
+    /**
+     * This method insert a tile to the correct spot in the set and returns the index of the position it was inserted at
+     * 
+     * @param tileToAdd
+     *            the {@link Tile} to add
+     * @return the index of the position it was inserted at
+     */
+    public int addToSet(TileSet tileSet, Tile tileToAdd) {
+    	return (tileSet instanceof TileGroup) ? addToSet((TileGroup) tileSet, tileToAdd) : addToSet((TileRun) tileSet, tileToAdd);
+    }
+    
+    private int addToSet(TileGroup group, Tile tileToAdd) {
+        group.add(tileToAdd);
+        return 0;
+    }
+
+    private int addToSet(TileRun run, Tile tileToAdd) {
+        if (!canAddToSet(run, tileToAdd)) {
+            throw new IllegalArgumentException("Tile can't be added to set");
+        }
+        if (run.isEmpty() || tileToAdd.isJoker()) {
+            // XXX: Does it depend on the strategy when dealing with a Joker?
+        	run.add(0, tileToAdd);
+            return 0;
+        }
+        Integer lowestBound = run.getLowestBound();
+        Integer tileNumber = tileToAdd.getNumber();
+        if (lowestBound == null || lowestBound == tileNumber + 1) {
+        	run.add(0, tileToAdd);
+            return 0;
+        }
+        run.add(tileToAdd);
+        return run.size() - 1;
+    }
+
+    
+    
+    
     /**
      * This method returns whether a specific {@link Tile} can be added to the given {@link TileRun}
      * 
@@ -131,11 +224,12 @@ public class StrategyHelper {
         return getShiftRunIndex(tileRun, tile) != -1;
     }
 
-    public void shiftRun(TileRun tileRun, Tile tile) {
+    public TileRun shiftRun(TileRun tileRun, Tile tile) {
         int index = getShiftRunIndex(tileRun, tile);
         if (index != -1) {
             tileRun.add(index, tile);
         }
+        return tileRun;
     }
 
     private int getShiftRunIndex(TileRun tileRun, Tile tile) {
@@ -161,11 +255,15 @@ public class StrategyHelper {
         return getSplitRunIndex(tileRun, tile) != -1;
     }
 
-    public void splitRun(TileRun tileRun, Tile tile) {
+    public List<TileRun> splitRun(TileRun tileRun, Tile tile) {
         int index = getSplitRunIndex(tileRun, tile);
         if (index != -1) {
             tileRun.add(index, tile);
         }
+        List<TileRun> tileRuns = new ArrayList<>();
+        tileRuns.add(new TileRun(tileRun.subList(0, index)));
+        tileRuns.add(new TileRun(tileRun.subList(index+1, tileRun.size()-1)));
+        return tileRuns;
     }
 
     private int getSplitRunIndex(TileRun tileRun, Tile tile) {
@@ -205,7 +303,7 @@ public class StrategyHelper {
 
     public void substituteInGroup(TileGroup tileGroup, Tile tile) {
         if (canSubstituteInGroup(tileGroup, tile)) {
-            tileGroup.addToSet(tile);
+            addToSet(tileGroup, tile);
         }
     }
 

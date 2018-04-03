@@ -24,40 +24,6 @@ public class TileGroup extends TileSet {
     /**
      * {@inheritDoc}
      */
-    @Override
-	public boolean canAddToSet(Tile tileToAdd) {
-		if (size() >= 4) {
-			return false;
-		}
-        if (tileToAdd.isJoker()) {
-            return !contains(tileToAdd);
-		}
-		TileColor colorToAdd = tileToAdd.getColor();
-		boolean seenTileColorToAdd = false;
-		int groupNumber = -1;
-		for (Tile tile : this) {
-			if (!tile.isJoker()) {
-				groupNumber = tile.getNumber();
-			}
-			if (colorToAdd.equals(tile.getColor())) {
-				seenTileColorToAdd = true;
-			}
-		}
-        return (tileToAdd.getNumber() == groupNumber && !seenTileColorToAdd);
-	}
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int addToSet(Tile tileToAdd) {
-        add(tileToAdd);
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
 	@Override
 	public int getScore() {
 		int score = 0;

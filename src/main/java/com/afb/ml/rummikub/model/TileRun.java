@@ -25,50 +25,6 @@ public class TileRun extends TileSet {
      * {@inheritDoc}
      */
     @Override
-    public boolean canAddToSet(Tile tileToAdd) {
-        if (size() == 0) {
-            return true;
-        }
-        // I can add any of the jocker once without constraints
-        if (tileToAdd.isJoker()) {
-            return !contains(tileToAdd);
-        }
-        TileColor tileSetColor = getColor();
-        Integer lowestBound = getLowestBound();
-        Integer upperBound = getUpperBound();
-
-        TileColor tileColor = tileToAdd.getColor();
-        int tileNumber = tileToAdd.getNumber();
-
-        // XXX: what happend in case of a jocker tiles?
-        return ((tileSetColor == null || tileSetColor == tileColor)
-                && (lowestBound == null || (lowestBound == tileNumber + 1) || (upperBound == tileNumber - 1)));
-    }
-
-    @Override
-    public int addToSet(Tile tileToAdd) {
-        if (!canAddToSet(tileToAdd)) {
-            throw new IllegalArgumentException("Tile can't be added to set");
-        }
-        if (size() == 0 || tileToAdd.isJoker()) {
-            // XXX: Does it depend on the strategy when dealing with a Joker?
-            add(0, tileToAdd);
-            return 0;
-        }
-        Integer lowestBound = getLowestBound();
-        Integer tileNumber = tileToAdd.getNumber();
-        if (lowestBound == null || lowestBound == tileNumber + 1) {
-            add(0, tileToAdd);
-            return 0;
-        }
-        add(tileToAdd);
-        return size() - 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public int getScore() {
         Integer lowestBound = getLowestBound();
         if (lowestBound == null) {
@@ -79,17 +35,7 @@ public class TileRun extends TileSet {
         return (lowestBound + highestBound) * (highestBound - lowestBound + 1) / 2;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        return (o != null && o instanceof TileRun && ((TileRun) o).size() == size() && containsAll((TileRun) o));
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    private Integer getLowestBound() {
+    public Integer getLowestBound() {
         Integer lowestBound = null;
         int index = 0;
         for (Tile tile : this) {
@@ -102,7 +48,7 @@ public class TileRun extends TileSet {
         return lowestBound;
     }
 
-    private Integer getUpperBound() {
+    public Integer getUpperBound() {
         Integer upperBound = getLowestBound();
         if (upperBound != null) {
             upperBound += size() - 1;
@@ -110,7 +56,7 @@ public class TileRun extends TileSet {
         return upperBound;
     }
 
-    private TileColor getColor() {
+    public TileColor getColor() {
         TileColor tileSetColor = null;
         for (Tile tile : this) {
             if (!tile.isJoker()) {
@@ -119,6 +65,16 @@ public class TileRun extends TileSet {
             }
         }
         return tileSetColor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o != null && o instanceof TileRun && ((TileRun) o).size() == size() && containsAll((TileRun) o));
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
 }

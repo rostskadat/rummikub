@@ -1,6 +1,7 @@
 package com.afb.ml.rummikub.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * A {@code Player} encapsulates the state of a physical player, and provides short hand methods to manipulate its
@@ -65,12 +66,12 @@ public class Player implements Serializable {
         rack.add(tile);
     }
 
-    public void removeTileSetFromRack(TileSet tileSet) {
-        rack.removeAll(tileSet);
-    }
-
     public void removeTileFromRack(Tile tile) {
         rack.remove(tile);
+    }
+
+    public void removeAllTilesFromRack(List<Tile> tiles) {
+        rack.removeAll(tiles);
     }
 
     @Override
