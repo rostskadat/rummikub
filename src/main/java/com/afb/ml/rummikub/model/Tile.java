@@ -68,4 +68,15 @@ public class Tile implements Serializable {
         return builder.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return (o != null && o instanceof Tile && ((Tile) o).getNumber() == getNumber()
+                && ((Tile) o).getColor() == getColor());
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
 }

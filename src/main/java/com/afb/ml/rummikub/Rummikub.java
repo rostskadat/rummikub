@@ -11,18 +11,18 @@ import com.afb.ml.rummikub.services.RummikubController;
 /**
  * A simple implementation of <a href="https://en.wikipedia.org/wiki/Rummikub">Rummikub</a>
  * 
- * @author N090536
+ * @author rostskadat
  *
  */
 @SpringBootApplication
 public class Rummikub implements ApplicationRunner {
 
+    @Autowired
+    private RummikubController rummikubController;
+
     public static void main(String[] args) {
         SpringApplication.run(Rummikub.class, args);
     }
-
-    @Autowired
-    private RummikubController rummikubController;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

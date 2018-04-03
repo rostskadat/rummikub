@@ -8,5 +8,5 @@ public enum TileColor {
 
     BLUE,
 
-    RED
+    RED;
 }

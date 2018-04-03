@@ -4,11 +4,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class TileGroupTest {
+import com.afb.ml.rummikub.AbstractUnitTest;
+
+public class TileGroupTest extends AbstractUnitTest {
 
 	@Test
 	public void testGetScoreNormal() {
@@ -77,7 +76,7 @@ public class TileGroupTest {
 	public void testCanAdd_01() {
 		TileGroup group = new TileGroup();
 		group.add(new Tile(3, TileColor.BLACK));
-		assertThat(group.canAdd(new Tile(3, TileColor.BLUE)), equalTo(true));
+		assertThat(group.canAddToSet(new Tile(3, TileColor.BLUE)), equalTo(true));
 	}
 
 	@Test
@@ -86,7 +85,7 @@ public class TileGroupTest {
 		group.add(new Tile(3, TileColor.BLACK));
 		group.add(new Tile(3, TileColor.BLUE));
 		group.add(new Tile(3, TileColor.ORANGE));
-		assertThat(group.canAdd(new Tile(3, TileColor.RED)), equalTo(true));
+		assertThat(group.canAddToSet(new Tile(3, TileColor.RED)), equalTo(true));
 	}
 
 	@Test
@@ -96,7 +95,7 @@ public class TileGroupTest {
 		group.add(new Tile(3, TileColor.BLUE));
 		group.add(new Tile(3, TileColor.ORANGE));
 		group.add(new Tile(3, TileColor.RED));
-		assertThat(group.canAdd(new Tile(3, TileColor.RED)), equalTo(false));
+		assertThat(group.canAddToSet(new Tile(3, TileColor.RED)), equalTo(false));
 	}
 
 	@Test
@@ -105,7 +104,7 @@ public class TileGroupTest {
 		group.add(new Tile(3, TileColor.BLACK));
 		group.add(new Tile(3, TileColor.BLUE));
 		group.add(new Tile(3, TileColor.ORANGE));
-		assertThat(group.canAdd(new Tile(4, TileColor.RED)), equalTo(false));
+		assertThat(group.canAddToSet(new Tile(4, TileColor.RED)), equalTo(false));
 	}
 
 	@Test
@@ -114,7 +113,7 @@ public class TileGroupTest {
 		group.add(new Tile(3, TileColor.BLACK));
 		group.add(new Tile(3, TileColor.BLUE));
 		group.add(new Tile(3, TileColor.ORANGE));
-		assertThat(group.canAdd(new Tile(TileColor.RED)), equalTo(true));
+		assertThat(group.canAddToSet(new Tile(TileColor.RED)), equalTo(true));
 	}
 
 	@Test
@@ -124,6 +123,6 @@ public class TileGroupTest {
 		group.add(new Tile(3, TileColor.BLUE));
 		group.add(new Tile(3, TileColor.ORANGE));
 		group.add(new Tile(3, TileColor.RED));
-		assertThat(group.canAdd(new Tile(TileColor.RED)), equalTo(false));
+		assertThat(group.canAddToSet(new Tile(TileColor.RED)), equalTo(false));
 	}
 }

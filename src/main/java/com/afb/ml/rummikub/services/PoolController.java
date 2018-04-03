@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.afb.ml.rummikub.model.Pool;
@@ -17,17 +18,16 @@ public class PoolController {
 
     private static final Log LOG = LogFactory.getLog(PoolController.class);
 
-    private static final int MIN_TILE_NO = 1;
-    private static final int MAX_TILE_NO = 13;
+    @Value("${numberOfTilesPerColor:13}")
+    private int numberOfTilesPerColor;
 
     private Pool pool;
 
     @PostConstruct
     private void postConstruct() {
-        // OK let's initialize the different objects...
         pool = new Pool();
         LOG.debug("Creating tiles...");
-        for (int i = MIN_TILE_NO; i <= MAX_TILE_NO; i++) {
+        for (int i = 1; i < numberOfTilesPerColor; i++) {
             for (TileColor color : TileColor.values()) {
                 // I add 2 tiles of each number / color
                 pool.add(new Tile(i, color));
@@ -45,6 +45,10 @@ public class PoolController {
 
     public int getPoolSize() {
         return pool.size();
+    }
+
+    public Pool getPool() {
+        return pool;
     }
 
 }

@@ -4,11 +4,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-public class TileRunTest {
+import com.afb.ml.rummikub.AbstractUnitTest;
+
+public class TileRunTest extends AbstractUnitTest {
 
 	@Test
 	public void testGetScoreNormal() {
@@ -76,7 +75,7 @@ public class TileRunTest {
 	@Test
 	public void testCanAdd_00() {
 		TileRun run = new TileRun();
-		assertThat(run.canAdd(new Tile(1, TileColor.BLACK)), equalTo(true));
+		assertThat(run.canAddToSet(new Tile(1, TileColor.BLACK)), equalTo(true));
 	}
 
 	@Test
@@ -84,7 +83,7 @@ public class TileRunTest {
 		TileRun run = new TileRun();
 		run.add(new Tile(1, TileColor.BLACK));
 		run.add(new Tile(2, TileColor.BLACK));
-		assertThat(run.canAdd(new Tile(3, TileColor.BLACK)), equalTo(true));
+		assertThat(run.canAddToSet(new Tile(3, TileColor.BLACK)), equalTo(true));
 	}
 
 	@Test
@@ -92,7 +91,7 @@ public class TileRunTest {
 		TileRun run = new TileRun();
 		run.add(new Tile(2, TileColor.BLACK));
 		run.add(new Tile(3, TileColor.BLACK));
-		assertThat(run.canAdd(new Tile(1, TileColor.BLACK)), equalTo(true));
+		assertThat(run.canAddToSet(new Tile(1, TileColor.BLACK)), equalTo(true));
 	}
 
 	@Test
@@ -100,7 +99,7 @@ public class TileRunTest {
 		TileRun run = new TileRun();
 		run.add(new Tile(1, TileColor.BLACK));
 		run.add(new Tile(2, TileColor.BLACK));
-		assertThat(run.canAdd(new Tile(4, TileColor.BLACK)), equalTo(false));
+		assertThat(run.canAddToSet(new Tile(4, TileColor.BLACK)), equalTo(false));
 	}
 
 	@Test
@@ -108,7 +107,7 @@ public class TileRunTest {
 		TileRun run = new TileRun();
 		run.add(new Tile(3, TileColor.BLACK));
 		run.add(new Tile(4, TileColor.BLACK));
-		assertThat(run.canAdd(new Tile(1, TileColor.BLACK)), equalTo(false));
+		assertThat(run.canAddToSet(new Tile(1, TileColor.BLACK)), equalTo(false));
 	}
 
 	@Test
@@ -116,7 +115,31 @@ public class TileRunTest {
 		TileRun run = new TileRun();
 		run.add(new Tile(1, TileColor.BLACK));
 		run.add(new Tile(2, TileColor.BLACK));
-		assertThat(run.canAdd(new Tile(TileColor.BLACK)), equalTo(true));
+		assertThat(run.canAddToSet(new Tile(TileColor.BLACK)), equalTo(true));
 	}
+
+    @Test
+    public void testCanAdd_06() {
+        TileRun run = new TileRun();
+        run.add(new Tile(TileColor.BLACK));
+        run.add(new Tile(2, TileColor.BLACK));
+        assertThat(run.canAddToSet(new Tile(3, TileColor.BLACK)), equalTo(true));
+    }
+
+    @Test
+    public void testCanAdd_07() {
+        TileRun run = new TileRun();
+        run.add(new Tile(1, TileColor.BLACK));
+        run.add(new Tile(TileColor.BLACK));
+        assertThat(run.canAddToSet(new Tile(3, TileColor.BLACK)), equalTo(true));
+    }
+
+    @Test
+    public void testCanAdd_08() {
+        TileRun run = new TileRun();
+        run.add(new Tile(1, TileColor.BLACK));
+        run.add(new Tile(TileColor.BLACK));
+        assertThat(run.canAddToSet(new Tile(TileColor.BLACK)), equalTo(false));
+    }
 
 }

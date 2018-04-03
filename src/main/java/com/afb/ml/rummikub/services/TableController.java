@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 
 import com.afb.ml.rummikub.model.Table;
-import com.afb.ml.rummikub.model.Tile;
 import com.afb.ml.rummikub.model.TileSet;
 
 @Controller
@@ -21,8 +20,7 @@ public class TableController {
         table.add(tileSet);
     }
 
-    public void play(TileSet tileSet, Tile tile, int index) {
-        tileSet.add(index, tile);
+    public void clearTable() {
+        table.clear();
     }
-
 }

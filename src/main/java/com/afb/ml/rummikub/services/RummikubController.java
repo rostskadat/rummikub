@@ -10,20 +10,27 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.afb.ml.rummikub.model.Player;
 import com.afb.ml.rummikub.model.Rack;
 import com.afb.ml.rummikub.model.Tile;
+import com.afb.ml.rummikub.services.strategy.IStrategy;
 
 @Controller
 public class RummikubController {
 
     private static final Log LOG = LogFactory.getLog(RummikubController.class);
 
-    private static final int NUMBER_OF_PLAYERS = 4;
-    private static final int NUMBER_OF_TILES = 14;
-    private static final int JOCKER_PENALITY = 30;
+    @Value("${numberOfPlayer:4}")
+    private int numberOfPlayer;
+
+    @Value("${numberOfTilesPerPlayer:14}")
+    private int numberOfTilesPerPlayer;
+
+    @Value("${jockerPenality:30}")
+    private int jockerPenality;
 
     private List<Player> players = new ArrayList<>();
 
@@ -33,35 +40,44 @@ public class RummikubController {
     @Autowired
     private PoolController poolController;
 
+    @Autowired
+    private TableController tableController;
+
     @PostConstruct
     private void postConstruct() {
         LOG.debug("Creating players...");
-        for (int i = 0; i < NUMBER_OF_PLAYERS; i++) {
+        for (int i = 0; i < numberOfPlayer; i++) {
             players.add(new Player(format("Player_%d", i)));
         }
         LOG.debug("Drawing initial tiles...");
         for (Player player : players) {
-            for (int i = 0; i < NUMBER_OF_TILES; i++) {
+            for (int i = 0; i < numberOfTilesPerPlayer; i++) {
                 player.addTileToRack(poolController.drawTileFromPool());
             }
-            LOG.debug(player.toString());
         }
         LOG.info("RummikubService initialization... OK");
     }
 
     public void play() {
         LOG.info("Playing Rummikub now...");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Starting with:");
+            LOG.debug(getGameStatus());
+        }
         int roundNumber = 0;
         boolean hasPlayedInThisRound = false;
         do {
             hasPlayedInThisRound = false;
             for (Player player : players) {
-                LOG.info(format("Round %d, Player %s is playing...", roundNumber, player.getName()));
                 hasPlayedInThisRound |= strategy.play(player);
                 if (player.isFinished()) {
-                    LOG.debug(format("Player %s is finished!", player.getName()));
+                    LOG.debug(format("Player %s has finished!", player.getName()));
                     break;
                 }
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(format("Round %d:", roundNumber));
+                LOG.debug(getGameStatus());
             }
             roundNumber++;
         } while (!isGameBlocked(hasPlayedInThisRound));
@@ -75,6 +91,20 @@ public class RummikubController {
         return !(hasPlayedInThisRound || poolController.getPoolSize() > 0);
     }
 
+    private String getGameStatus() {
+        final String EOL = String.format("%n");
+        StringBuilder sb = new StringBuilder();
+        sb.append(EOL).append("Pool (").append(poolController.getPoolSize()).append("): ")
+                .append(poolController.getPool());
+        for (Player player : players) {
+            sb.append(EOL).append("Player ").append(player.getName()).append(": ")
+                    .append(player.getRack());
+        }
+        sb.append(EOL).append("Table (").append(tableController.getTileSets().size()).append("): ")
+                .append(tableController.getTileSets());
+        return sb.toString();
+    }
+
     private Player getWinner() {
         Player winner = null;
         int smallestScore = -1;
@@ -82,7 +112,7 @@ public class RummikubController {
             Rack rack = player.getRack();
             int score = 0;
             for (Tile tile : rack) {
-                score += tile.isJoker() ? JOCKER_PENALITY : tile.getNumber();
+                score += tile.isJoker() ? jockerPenality : tile.getNumber();
             }
             if (smallestScore == -1 || score < smallestScore) {
                 winner = player;

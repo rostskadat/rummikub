@@ -2,6 +2,13 @@ package com.afb.ml.rummikub.model;
 
 import java.io.Serializable;
 
+/**
+ * A {@code Player} encapsulates the state of a physical player, and provides short hand methods to manipulate its
+ * associated {@link Rack}.
+ * 
+ * @author rostskadat
+ *
+ */
 public class Player implements Serializable {
 
     private static final long serialVersionUID = 1L;
