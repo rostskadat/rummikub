@@ -26,7 +26,7 @@ public class TileRun extends TileSet {
      */
     @Override
     public int getScore() {
-        Integer lowestBound = getLowestBound();
+        Integer lowestBound = getLowerBound();
         if (lowestBound == null) {
             // only jockers
             return 30 * size();
@@ -35,7 +35,7 @@ public class TileRun extends TileSet {
         return (lowestBound + highestBound) * (highestBound - lowestBound + 1) / 2;
     }
 
-    public Integer getLowestBound() {
+    public Integer getLowerBound() {
         Integer lowestBound = null;
         int index = 0;
         for (Tile tile : this) {
@@ -49,7 +49,7 @@ public class TileRun extends TileSet {
     }
 
     public Integer getUpperBound() {
-        Integer upperBound = getLowestBound();
+        Integer upperBound = getLowerBound();
         if (upperBound != null) {
             upperBound += size() - 1;
         }

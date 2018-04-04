@@ -39,7 +39,7 @@ public class Utils {
 	public static TileGroup getTileGroup(StrategyHelper helper, int number, TileColor... colors) {
 		TileGroup group = new TileGroup();
 		// Make sure that the order is not important
-		List<TileColor> list = Arrays.asList(TileColor.values());
+        List<TileColor> list = Arrays.asList(colors);
 		Collections.reverse(list);
 		Collections.rotate(list, 2);
 		list.forEach(color -> {

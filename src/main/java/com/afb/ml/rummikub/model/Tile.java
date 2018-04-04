@@ -70,8 +70,9 @@ public class Tile implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        return (o != null && o instanceof Tile && ((Tile) o).getNumber() == getNumber()
-                && ((Tile) o).getColor() == getColor());
+        return (o != null && o instanceof Tile
+                && (isJoker() || ((Tile) o).isJoker() || ((Tile) o).getNumber() == getNumber()
+                        && ((Tile) o).getColor() == getColor()));
     }
 
     @Override

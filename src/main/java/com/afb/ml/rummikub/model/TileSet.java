@@ -3,6 +3,8 @@ package com.afb.ml.rummikub.model;
 import java.util.ArrayList;
 import java.util.List;
 
+//@JsonSerialize(using = TileSetSerializer.class)
+//@JsonDeserialize(using = TileSetDeserializer.class)
 public abstract class TileSet extends ArrayList<Tile> {
 
 	private static final long serialVersionUID = 1L;
@@ -32,4 +34,21 @@ public abstract class TileSet extends ArrayList<Tile> {
      * @return the score of this {@code TileSet}
      */
 	public abstract int getScore();
+
+    /**
+     * This method returns whether the TileSet contains a specific Jocker
+     * 
+     * @param jocker
+     * @return
+     */
+    public boolean containsJocker(Tile jocker) {
+        assert (jocker.isJoker());
+        for (Tile tile : this) {
+            if (tile.isJoker() && tile.getColor() == jocker.getColor()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

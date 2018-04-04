@@ -3,6 +3,8 @@ package com.afb.ml.rummikub.model;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * A {@code Player} encapsulates the state of a physical player, and provides short hand methods to manipulate its
  * associated {@link Rack}.
@@ -58,6 +60,8 @@ public class Player implements Serializable {
     public void setStarted(boolean started) {
         this.started = started;
     }
+
+    @JsonIgnore
     public boolean isFinished() {
         return rack.isEmpty();
     }

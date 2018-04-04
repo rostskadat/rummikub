@@ -1,7 +1,10 @@
 package com.afb.ml.rummikub.services.strategy;
 
+import static java.lang.String.format;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +27,7 @@ public class StrategyHelper {
 
     /**
      * This method returns the sets that are valid for an Initial move (whose score is more than
-     * {@code INITIAL_MIN_SCORE} (30)).
+     * {@code initialScoreThreshold} (30)).
      * 
      * @param rack
      *            the {@link Rack} from which to draw the {@link Tile}
@@ -64,6 +67,14 @@ public class StrategyHelper {
         return highestTileSet;
     }
 
+    /**
+     * This method returns all the valid {@link TilSet} found in the {@link Rack}. A {@link TileSet} is considered valid
+     * if it has at least 3 {@link Tile}.
+     * 
+     * @param rack
+     *            The {@link Rack} containing the {@link Tile}
+     * @return a {@link List} of valid {@link TilSet}
+     */
     public List<TileSet> getValidTileSets(Rack rack) {
         int size = rack.size();
         Map<Tile, TileRun> runs = new HashMap<>(size);
@@ -138,7 +149,7 @@ public class StrategyHelper {
 			return false;
 		}
         if (tileToAdd.isJoker()) {
-            return !group.contains(tileToAdd);
+            return !group.containsJocker(tileToAdd);
 		}
 		TileColor colorToAdd = tileToAdd.getColor();
 		boolean seenTileColorToAdd = false;
@@ -160,10 +171,10 @@ public class StrategyHelper {
         }
         // I can add any of the jocker once without constraints
         if (tileToAdd.isJoker()) {
-            return !run.contains(tileToAdd);
+            return !run.containsJocker(tileToAdd);
         }
         TileColor tileSetColor = run.getColor();
-        Integer lowestBound = run.getLowestBound();
+        Integer lowestBound = run.getLowerBound();
         Integer upperBound = run.getUpperBound();
 
         TileColor tileColor = tileToAdd.getColor();
@@ -200,7 +211,7 @@ public class StrategyHelper {
         	run.add(0, tileToAdd);
             return 0;
         }
-        Integer lowestBound = run.getLowestBound();
+        Integer lowestBound = run.getLowerBound();
         Integer tileNumber = tileToAdd.getNumber();
         if (lowestBound == null || lowestBound == tileNumber + 1) {
         	run.add(0, tileToAdd);
@@ -210,38 +221,47 @@ public class StrategyHelper {
         return run.size() - 1;
     }
 
-    
-    
-    
     /**
-     * This method returns whether a specific {@link Tile} can be added to the given {@link TileRun}
+     * This method returns whether a specific {@link Tile} can be added to the given {@link TileRun} by shifting the
+     * run. Shifting a run means adding a Tile either at the beginning or the end of the run.
      * 
      * @param tileRun
      * @param tile
      * @return
      */
     public boolean canShiftRun(TileRun tileRun, Tile tile) {
-        return getShiftRunIndex(tileRun, tile) != -1;
+        return !getShiftRunIndexes(tileRun, tile).isEmpty();
     }
 
     public TileRun shiftRun(TileRun tileRun, Tile tile) {
-        int index = getShiftRunIndex(tileRun, tile);
-        if (index != -1) {
-            tileRun.add(index, tile);
+        List<Integer> indexes = getShiftRunIndexes(tileRun, tile);
+        if (!indexes.isEmpty()) {
+            // XXX The strategy should be the one to decide where to put it
+            tileRun.add(indexes.get(0), tile);
+        } else {
+            throw new IllegalArgumentException(format("Tile %s can't be used to shift TileRun %s", tile, tileRun));
         }
         return tileRun;
     }
 
-    private int getShiftRunIndex(TileRun tileRun, Tile tile) {
+    private List<Integer> getShiftRunIndexes(TileRun tileRun, Tile tile) {
         if (tile.isJoker()) {
-            return 0;
+            // XXX: Is that correct when the TileRun already contains a Jocker. Check definition of Tile.equals
+            return Arrays.asList(0, tileRun.size());
         }
-        if (tileRun.get(0).getNumber() == (tile.getNumber() + 1)) {
-            return 0;
-        } else if (tileRun.get(tileRun.size() - 1).getNumber() == (tile.getNumber() - 1)) {
-            return tileRun.size();
+        if (tileRun.contains(tile)) {
+            return Collections.emptyList();
         }
-        return -1;
+
+        TileColor tileSetColor = tileRun.getColor();
+        if (tileSetColor == tile.getColor()) {
+            if (tileRun.getLowerBound() == (tile.getNumber() + 1)) {
+                return Arrays.asList(0);
+            } else if (tileRun.getUpperBound() == (tile.getNumber() - 1)) {
+                return Arrays.asList(tileRun.size());
+            }
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -252,32 +272,42 @@ public class StrategyHelper {
      * @return
      */
     public boolean canSplitRun(TileRun tileRun, Tile tile) {
-        return getSplitRunIndex(tileRun, tile) != -1;
+        return !getSplitRunIndexes(tileRun, tile).isEmpty();
     }
 
     public List<TileRun> splitRun(TileRun tileRun, Tile tile) {
-        int index = getSplitRunIndex(tileRun, tile);
-        if (index != -1) {
-            tileRun.add(index, tile);
+        List<Integer> indexes = getSplitRunIndexes(tileRun, tile);
+        if (!indexes.isEmpty()) {
+            // XXX The strategy should be the one to decide where to put it
+            int index = indexes.get(0);
+            TileRun lowerTileRun = new TileRun(tileRun.subList(0, index));
+            TileRun upperTileRun = new TileRun(tileRun.subList(index + 1, tileRun.size()));
+            lowerTileRun.add(tile);
+            upperTileRun.add(0, tile);
+            return Arrays.asList(lowerTileRun, upperTileRun);
+        } else {
+            throw new IllegalArgumentException(format("Tile %s can't be used to split TileRun %s", tile, tileRun));
         }
-        List<TileRun> tileRuns = new ArrayList<>();
-        tileRuns.add(new TileRun(tileRun.subList(0, index)));
-        tileRuns.add(new TileRun(tileRun.subList(index+1, tileRun.size()-1)));
-        return tileRuns;
     }
 
-    private int getSplitRunIndex(TileRun tileRun, Tile tile) {
-        if (tile.isJoker() && tileRun.size() >= 5) {
-            return 2;
+    private List<Integer> getSplitRunIndexes(TileRun tileRun, Tile tile) {
+        int tileRunSize = tileRun.size();
+        if (tile.isJoker() && tileRunSize >= 5) {
+            List<Integer> indexes = new ArrayList<>();
+            for (int i = 2; i < tileRunSize - 1; i++) {
+                indexes.add(i);
+            }
+            return indexes;
         }
-        if (tileRun.size() >= 5) {
-            if (tileRun.get(2).getNumber() == (tile.getNumber() + 1)) {
-                return 2;
-            } else if (tileRun.get(tileRun.size() - 3).getNumber() == (tile.getNumber() - 1)) {
-                return tileRun.size() - 2;
+        TileColor tileSetColor = tileRun.getColor();
+        if (tileSetColor == tile.getColor() && tileRunSize >= 5) {
+            Integer lowerBound = tileRun.getLowerBound();
+            Integer upperBound = tileRun.getUpperBound();
+            if (lowerBound + 2 <= tile.getNumber() && tile.getNumber() + 2 <= upperBound) {
+                return Arrays.asList(tile.getNumber() - lowerBound);
             }
         }
-        return -1;
+        return Collections.emptyList();
     }
 
     /**
@@ -287,8 +317,12 @@ public class StrategyHelper {
      * @return
      */
     public boolean canSubstituteInGroup(TileGroup tileGroup, Tile tile) {
+        int tileSetSize = tileGroup.size();
+        if (tileSetSize >= 4) {
+            return false;
+        }
         if (tile.isJoker()) {
-            return true;
+            return !tileGroup.containsJocker(tile);
         }
         for (Tile tileInGroup : tileGroup) {
             if (tileInGroup.getNumber() != tile.getNumber()) {
@@ -301,10 +335,13 @@ public class StrategyHelper {
         return true;
     }
 
-    public void substituteInGroup(TileGroup tileGroup, Tile tile) {
+    public TileGroup substituteInGroup(TileGroup tileGroup, Tile tile) {
         if (canSubstituteInGroup(tileGroup, tile)) {
-            addToSet(tileGroup, tile);
+            tileGroup.add(tile);
+        } else {
+            throw new IllegalArgumentException(format("Tile %s can't substitute in TileGroup %s", tile, tileGroup));
         }
+        return tileGroup;
     }
 
 }
