@@ -12,7 +12,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.assertj.core.util.CheckReturnValue;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,7 +70,6 @@ public class GameStateController {
         }
     }
 
-    @CheckReturnValue
     public Tile getNextTile(Pool pool) {
         int nextTileIndex = -1;
         if (useSavedGame && !tileIndexesFromPreviousGame.isEmpty()) {
