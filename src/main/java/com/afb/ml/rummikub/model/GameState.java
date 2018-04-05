@@ -8,7 +8,7 @@ public class GameState implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<Tile> drawnTiles = new ArrayList<>();
+    private List<Integer> drawnTileIndexes = new ArrayList<>();
 
     private Table finalTable;
 
@@ -16,12 +16,12 @@ public class GameState implements Serializable {
 
     private List<Player> finalPlayers = new ArrayList<>();
 
-    public List<Tile> getDrawnTiles() {
-        return drawnTiles;
+    public List<Integer> getDrawnTileIndexes() {
+        return drawnTileIndexes;
     }
 
-    public void setDrawnTiles(List<Tile> drawnTiles) {
-        this.drawnTiles = drawnTiles;
+    public void setDrawnTileIndexes(List<Integer> drawnTileIndexes) {
+        this.drawnTileIndexes = drawnTileIndexes;
     }
 
     public Table getFinalTable() {

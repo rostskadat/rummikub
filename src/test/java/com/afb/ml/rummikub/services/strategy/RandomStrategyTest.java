@@ -7,7 +7,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 
 import com.afb.ml.rummikub.AbstractUnitTest;
 import com.afb.ml.rummikub.model.Player;
@@ -19,7 +18,6 @@ import com.afb.ml.rummikub.model.TileSet;
 import com.afb.ml.rummikub.services.PoolController;
 import com.afb.ml.rummikub.services.TableController;
 
-@DirtiesContext
 public class RandomStrategyTest extends AbstractUnitTest {
 
     private static final boolean PLAYED = true;

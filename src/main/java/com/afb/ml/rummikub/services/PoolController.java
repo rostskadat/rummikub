@@ -29,8 +29,8 @@ public class PoolController {
     private void postConstruct() {
         pool = new Pool();
         LOG.debug("Creating tiles...");
-        for (int i = 1; i < numberOfTilesPerColor; i++) {
-            for (TileColor color : TileColor.values()) {
+        for (TileColor color : TileColor.values()) {
+            for (int i = 1; i <= numberOfTilesPerColor; i++) {
                 // I add 2 tiles of each number / color
                 pool.add(new Tile(i, color));
                 pool.add(new Tile(i, color));

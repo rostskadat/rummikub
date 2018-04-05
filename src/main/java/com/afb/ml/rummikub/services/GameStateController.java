@@ -31,22 +31,22 @@ public class GameStateController {
 
     private static final Log LOG = LogFactory.getLog(GameStateController.class);
 
-    @Value("${useGameStateFilename}")
-    private boolean useGameStateFilename;
+    @Value("${useSavedGame}")
+    private boolean useSavedGame;
 
     @Value("${gameStateFilename}")
     private File gameStateFilename;
 
     // The list of tiles to be drawn (from a previous game).
-    private List<Tile> tilesFromPreviousGame;
+    private List<Integer> tileIndexesFromPreviousGame;
 
     // The list of tiles to be drawn (from a previous game).
-    private List<Tile> drawnTiles;
+    private List<Integer> drawnTileIndexes;
 
     // Lazy is required to make sure that the postConstruct method is called before any of the others
     @Lazy
     @Autowired
-    PlayerController playerController;
+    private PlayerController playerController;
 
     @Lazy
     @Autowired
@@ -58,13 +58,13 @@ public class GameStateController {
 
     @PostConstruct
     private void postConstruct() {
-        tilesFromPreviousGame = new ArrayList<>();
-        drawnTiles = new ArrayList<>();
-        if (useGameStateFilename) {
+        tileIndexesFromPreviousGame = new ArrayList<>();
+        drawnTileIndexes = new ArrayList<>();
+        if (useSavedGame) {
             if (isValidGameSeed(gameStateFilename)) {
                 LOG.debug(format("Reading game state from %s...", gameStateFilename));
                 GameState gameState = readGameState();
-                tilesFromPreviousGame.addAll(gameState.getDrawnTiles());
+                tileIndexesFromPreviousGame.addAll(gameState.getDrawnTileIndexes());
             } else {
                 LOG.warn(format("No game state found in %s", gameStateFilename));
             }
@@ -73,27 +73,26 @@ public class GameStateController {
 
     @CheckReturnValue
     public Tile getNextTile(Pool pool) {
-        Tile nextTile = null;
-        if (useGameStateFilename && !tilesFromPreviousGame.isEmpty()) {
+        int nextTileIndex = -1;
+        if (useSavedGame && !tileIndexesFromPreviousGame.isEmpty()) {
             // OK I had a valid previous game
-            nextTile = tilesFromPreviousGame.remove(0);
-            pool.remove(nextTile);
+            nextTileIndex = tileIndexesFromPreviousGame.remove(0);
         } else {
             // Otherwise I just do not save the game or it was not saved properly the last time
-            nextTile = pool.remove(ThreadLocalRandom.current().nextInt(0, pool.size()));
+            nextTileIndex = ThreadLocalRandom.current().nextInt(0, pool.size());
         }
-        drawnTiles.add(nextTile);
-        return nextTile;
-
+        drawnTileIndexes.add(nextTileIndex);
+        assert (nextTileIndex != -1);
+        return pool.remove(nextTileIndex);
     }
 
     public void saveGameFinalState() {
-        if (useGameStateFilename) {
+        if (useSavedGame) {
             GameState gameState = new GameState();
             gameState.setFinalPool(poolController.getPool());
             gameState.setFinalTable(tableController.getTable());
             gameState.setFinalPlayers(playerController.getPlayers());
-            gameState.setDrawnTiles(drawnTiles);
+            gameState.setDrawnTileIndexes(drawnTileIndexes);
             try {
                 writeGameState(gameStateFilename, gameState);
             } catch (IOException e) {
@@ -127,6 +126,14 @@ public class GameStateController {
         } catch (IOException e) {
             throw new BeanCreationException(e.getMessage(), e);
         }
+    }
+
+    public List<Integer> getTilesFromPreviousGame() {
+        return tileIndexesFromPreviousGame;
+    }
+
+    public void setTilesFromPreviousGame(List<Integer> tileIndexesFromPreviousGame) {
+        this.tileIndexesFromPreviousGame = tileIndexesFromPreviousGame;
     }
 
 }

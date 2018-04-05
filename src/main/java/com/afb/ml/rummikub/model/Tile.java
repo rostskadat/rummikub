@@ -71,13 +71,24 @@ public class Tile implements Serializable {
     @Override
     public boolean equals(Object o) {
         return (o != null && o instanceof Tile
-                && (isJoker() || ((Tile) o).isJoker() || ((Tile) o).getNumber() == getNumber()
-                        && ((Tile) o).getColor() == getColor()));
+                && (sameJocker(this, (Tile) o) || (sameNumber(this, (Tile) o) && sameColor(this, (Tile) o))));
     }
 
     @Override
     public int hashCode() {
         return super.hashCode();
+    }
+
+    private static final boolean sameJocker(Tile t1, Tile t2) {
+        return t1.isJoker() && t2.isJoker() && sameColor(t1, t2);
+    }
+
+    private static final boolean sameColor(Tile t1, Tile t2) {
+        return t1.getColor() == t2.getColor();
+    }
+
+    private static final boolean sameNumber(Tile t1, Tile t2) {
+        return t1.getNumber() == t2.getNumber();
     }
 
 }
