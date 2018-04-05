@@ -2,8 +2,6 @@ package com.afb.ml.rummikub.services;
 
 import static java.lang.String.format;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,23 +9,20 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 
-import com.afb.ml.rummikub.common.GameStateUtils;
-import com.afb.ml.rummikub.model.GameState;
 import com.afb.ml.rummikub.model.Player;
 import com.afb.ml.rummikub.model.Rack;
 import com.afb.ml.rummikub.model.Tile;
 import com.afb.ml.rummikub.services.strategy.IStrategy;
 
 @Controller
-public class RummikubController {
+public class PlayerController {
 
-    private static final Log LOG = LogFactory.getLog(RummikubController.class);
+    private static final Log LOG = LogFactory.getLog(PlayerController.class);
 
     @Value("${numberOfPlayer:4}")
     private int numberOfPlayer;
@@ -38,13 +33,7 @@ public class RummikubController {
     @Value("${jockerPenality:30}")
     private int jockerPenality;
 
-    @Value("${useGameStateFilename}")
-    private boolean useGameStateFilename;
-
-    @Value("${gameStateFilename}")
-    private File gameStateFilename;
-
-    private List<Player> players = new ArrayList<>();
+    private List<Player> players;
 
     @Autowired
     private IStrategy strategy;
@@ -55,12 +44,13 @@ public class RummikubController {
     @Autowired
     private TableController tableController;
 
+    @Autowired
+    private GameStateController gameStateController;
+
     @PostConstruct
     private void postConstruct() {
-        if (useGameStateFilename && GameStateUtils.isValidGameSeed(gameStateFilename)) {
-            LOG.debug(String.format("Reading Players state from %s...", gameStateFilename));
-            readGameState();
-        } else {
+        players = new ArrayList<>();
+        if (players.isEmpty()) {
             LOG.debug("Creating players...");
             for (int i = 0; i < numberOfPlayer; i++) {
                 players.add(new Player(format("Player_%d", i)));
@@ -72,7 +62,14 @@ public class RummikubController {
                 }
             }
         }
-        LOG.info("RummikubController initialization... OK");
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
     }
 
     public void play() {
@@ -92,6 +89,7 @@ public class RummikubController {
         if (isGameBlocked(hasPlayedInThisRound)) {
             LOG.warn(format("Game blocked on round %d", roundNumber));
         }
+        gameStateController.saveGameFinalState();
         getWinner();
     }
 
@@ -108,17 +106,6 @@ public class RummikubController {
                 if (poolController.getPoolSize() > 0) {
                     player.getRack().add(poolController.drawTileFromPool());
                 }
-            }
-        }
-        if (useGameStateFilename) {
-            GameState gameState = new GameState();
-            gameState.setPlayers(players);
-            gameState.setPool(poolController.getPool());
-            gameState.setTable(tableController.getTable());
-            try {
-                GameStateUtils.writeGameState(gameStateFilename, gameState);
-            } catch (IOException e) {
-                LOG.error(e);
             }
         }
         return hasPlayedInThisRound;
@@ -162,14 +149,5 @@ public class RummikubController {
         }
         LOG.info(format("And the winner is %s", winner.getName()));
         return winner;
-    }
-
-    private void readGameState() {
-        try {
-            GameState state = GameStateUtils.readGameState(gameStateFilename);
-            players.addAll(state.getPlayers());
-        } catch (IOException e) {
-            throw new BeanCreationException(e.getMessage(), e);
-        }
     }
 }
