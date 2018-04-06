@@ -79,8 +79,8 @@ public class GameStateController {
             // Otherwise I just do not save the game or it was not saved properly the last time
             nextTileIndex = ThreadLocalRandom.current().nextInt(0, pool.size());
         }
-        drawnTileIndexes.add(nextTileIndex);
         assert (nextTileIndex != -1);
+        drawnTileIndexes.add(nextTileIndex);
         return pool.remove(nextTileIndex);
     }
 
