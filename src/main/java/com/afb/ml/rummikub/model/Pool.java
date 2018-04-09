@@ -9,7 +9,6 @@ import java.util.ArrayList;
  * @author rostskadat
  *
  */
-// @JsonSerialize(as = ArrayList.class)
 public class Pool extends ArrayList<Tile> {
 
     private static final long serialVersionUID = 1L;

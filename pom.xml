@@ -5,7 +5,33 @@
   <artifactId>rummikub</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>rummikub</name>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://github.com/rostskadat/rummikub/LICENSE.md</url>
+      <comments>MIT License</comments>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <email>xs0040@gmail.com</email>
+      <id>chen0040</id>
+      <name>Xianshun Chen</name>
+      <url>https://github.com/chen0040</url>
+    </developer>
+  </developers>
+  <scm>
+    <url>https://github.com/rostskadat/rummikub</url>
+    <connection>scm:git:git://github.com/rostskadat/rummikub.git</connection>
+    <developerConnection>scm:git:git@github.com:rostskadat/rummikub.git</developerConnection>
+  </scm>
+  <issueManagement>
+    <url>https://github.com/rostskadat/rummikub/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+  <name>Rummikub</name>
+  <description>Rummikub with a machine learning flavor</description>
+  <url>https://github.com/rostskadat/rummikub</url>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>

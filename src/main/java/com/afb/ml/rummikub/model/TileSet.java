@@ -3,8 +3,6 @@ package com.afb.ml.rummikub.model;
 import java.util.ArrayList;
 import java.util.List;
 
-//@JsonSerialize(using = TileSetSerializer.class)
-//@JsonDeserialize(using = TileSetDeserializer.class)
 public abstract class TileSet extends ArrayList<Tile> {
 
 	private static final long serialVersionUID = 1L;

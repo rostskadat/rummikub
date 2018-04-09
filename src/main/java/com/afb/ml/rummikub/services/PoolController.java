@@ -27,18 +27,7 @@ public class PoolController {
 
     @PostConstruct
     private void postConstruct() {
-        pool = new Pool();
-        LOG.debug("Creating tiles...");
-        for (TileColor color : TileColor.values()) {
-            for (int i = 1; i <= numberOfTilesPerColor; i++) {
-                // I add 2 tiles of each number / color
-                pool.add(new Tile(i, color));
-                pool.add(new Tile(i, color));
-            }
-        }
-        LOG.debug("Adding Jockers...");
-        pool.add(new Tile(TileColor.RED));
-        pool.add(new Tile(TileColor.BLACK));
+        resetPool();
     }
 
     public Tile drawTileFromPool() {
@@ -53,5 +42,20 @@ public class PoolController {
 
     public Pool getPool() {
         return pool;
+    }
+
+    public void resetPool() {
+        pool = new Pool();
+        LOG.debug("Creating tiles...");
+        for (TileColor color : TileColor.values()) {
+            for (int i = 1; i <= numberOfTilesPerColor; i++) {
+                // I add 2 tiles of each number / color
+                pool.add(new Tile(i, color));
+                pool.add(new Tile(i, color));
+            }
+        }
+        LOG.debug("Adding Jockers...");
+        pool.add(new Tile(TileColor.RED));
+        pool.add(new Tile(TileColor.BLACK));
     }
 }

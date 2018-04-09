@@ -50,16 +50,14 @@ public class PlayerController {
     @PostConstruct
     private void postConstruct() {
         players = new ArrayList<>();
-        if (players.isEmpty()) {
-            LOG.debug("Creating players...");
-            for (int i = 0; i < numberOfPlayer; i++) {
-                players.add(new Player(format("Player_%d", i)));
-            }
-            LOG.debug("Drawing initial tiles...");
-            for (Player player : players) {
-                for (int i = 0; i < numberOfTilesPerPlayer; i++) {
-                    player.addTileToRack(poolController.drawTileFromPool());
-                }
+        LOG.debug("Creating players...");
+        for (int i = 0; i < numberOfPlayer; i++) {
+            players.add(new Player(format("Player_%d", i)));
+        }
+        LOG.debug("Drawing initial tiles...");
+        for (Player player : players) {
+            for (int i = 0; i < numberOfTilesPerPlayer; i++) {
+                player.addTileToRack(poolController.drawTileFromPool());
             }
         }
     }

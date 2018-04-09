@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,13 +20,18 @@ public class PoolControllerTest extends AbstractUnitTest {
     @Autowired
     private PoolController poolController;
 
+    @Before
+    public void before() {
+        poolController.resetPool();
+    }
+
     @Test
     public void testGetSize() {
         Pool pool = poolController.getPool();
         assertThat(pool, notNullValue());
         assertThat(pool.isEmpty(), equalTo(false));
         assertThat(poolController.getPoolSize(), equalTo(pool.size()));
-        // 13 tiles * 2 * 4 colors + 2 jockers - 14 Tiles * 4 players
-        assertThat(pool.size(), equalTo(numberOfTilesPerColor * 4 * 2 + 2 - 14 * 4));
+        // 13 tiles * 2 * 4 colors + 2 jockers
+        assertThat(pool.size(), equalTo(numberOfTilesPerColor * 4 * 2 + 2));
     }
 }

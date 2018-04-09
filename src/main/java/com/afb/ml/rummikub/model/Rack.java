@@ -8,7 +8,6 @@ import java.util.ArrayList;
  * @author rostskadat
  *
  */
-// @JsonSerialize(as = ArrayList.class)
 public class Rack extends ArrayList<Tile> {
 
     private static final long serialVersionUID = 1L;
