@@ -7,9 +7,9 @@
   <packaging>jar</packaging>
   <licenses>
     <license>
-      <name>MIT</name>
-      <url>https://github.com/rostskadat/rummikub/LICENSE.md</url>
-      <comments>MIT License</comments>
+      <name>GPL</name>
+      <url>https://github.com/rostskadat/rummikub/LICENSE</url>
+      <comments>GNU GENERAL PUBLIC LICENSE</comments>
     </license>
   </licenses>
   <developers>
