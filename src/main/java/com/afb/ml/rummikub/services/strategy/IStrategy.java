@@ -3,7 +3,7 @@ package com.afb.ml.rummikub.services.strategy;
 import com.afb.ml.rummikub.model.Player;
 
 /**
- * The interface every strategy must implement.
+ * An {@code IStrategy} encapsulate the
  * 
  * @author rostskadat
  *

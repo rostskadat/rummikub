@@ -19,6 +19,14 @@ import com.afb.ml.rummikub.model.TileGroup;
 import com.afb.ml.rummikub.model.TileRun;
 import com.afb.ml.rummikub.model.TileSet;
 
+/**
+ * This utility class provides methods that are used by all {@link IStrategy} implementation. It can tells you whether a
+ * specific {@link Tile} can be shifted or a {@link TileGroup} created. Its goal is to expose all the underlying details
+ * to a specific {@link IStrategy} implementation.
+ * 
+ * @author rostskadat
+ *
+ */
 @Service
 public class StrategyHelper {
 
@@ -223,28 +231,13 @@ public class StrategyHelper {
 
     /**
      * This method returns whether a specific {@link Tile} can be added to the given {@link TileRun} by shifting the
-     * run. Shifting a run means adding a Tile either at the beginning or the end of the run.
+     * run. Shifting a run means adding a {@link Tile} either at the beginning or the end of the {@link TileRun}.
      * 
      * @param tileRun
      * @param tile
      * @return
      */
-    public boolean canShiftRun(TileRun set, Tile tile) {
-        return !getShiftRunIndexes(set, tile).isEmpty();
-    }
-
-    public TileRun shiftRun(TileRun set, Tile tile) {
-        List<Integer> indexes = getShiftRunIndexes(set, tile);
-        if (!indexes.isEmpty()) {
-            // XXX The strategy should be the one to decide where to put it
-            set.add(indexes.get(0), tile);
-        } else {
-            throw new IllegalArgumentException(format("Tile %s can't be used to shift TileRun %s", tile, set));
-        }
-        return set;
-    }
-
-    private List<Integer> getShiftRunIndexes(TileRun set, Tile tile) {
+    public List<Integer> getShiftRunIndexes(TileRun set, Tile tile) {
         if (tile.isJoker()) {
             // XXX: Is that correct when the TileRun already contains a Jocker. Check definition of Tile.equals
             return Arrays.asList(0, set.size());
@@ -264,6 +257,14 @@ public class StrategyHelper {
         return Collections.emptyList();
     }
 
+    public TileRun shiftRun(TileRun set, Tile tile, Integer index) {
+        if (getShiftRunIndexes(set, tile).contains(index)) {
+            set.add(index, tile);
+            return set;
+        }
+        throw new IllegalArgumentException(format("Can't shift %s with %s @ %d", set, tile, index));
+    }
+
     /**
      * This method returns whether a specific {@link Tile} can be added to the given {@link TileRun}
      * 
@@ -271,26 +272,7 @@ public class StrategyHelper {
      * @param tile
      * @return
      */
-    public boolean canSplitRun(TileRun set, Tile tile) {
-        return !getSplitRunIndexes(set, tile).isEmpty();
-    }
-
-    public List<TileRun> splitRun(TileRun set, Tile tile) {
-        List<Integer> indexes = getSplitRunIndexes(set, tile);
-        if (!indexes.isEmpty()) {
-            // XXX The strategy should be the one to decide where to put it
-            int index = indexes.get(0);
-            TileRun lowerTileRun = new TileRun(set.subList(0, index));
-            TileRun upperTileRun = new TileRun(set.subList(index, set.size()));
-            lowerTileRun.add(tile);
-            assert (set.size() + 1 == lowerTileRun.size() + upperTileRun.size());
-            return Arrays.asList(lowerTileRun, upperTileRun);
-        } else {
-            throw new IllegalArgumentException(format("Tile %s can't be used to split TileRun %s", tile, set));
-        }
-    }
-
-    private List<Integer> getSplitRunIndexes(TileRun set, Tile tile) {
+    public List<Integer> getSplitRunIndexes(TileRun set, Tile tile) {
         int setSize = set.size();
         if (tile.isJoker() && setSize >= 5) {
             List<Integer> indexes = new ArrayList<>();
@@ -308,6 +290,17 @@ public class StrategyHelper {
             }
         }
         return Collections.emptyList();
+    }
+
+    public List<TileRun> splitRun(TileRun set, Tile tile, Integer index) {
+        if (getSplitRunIndexes(set, tile).contains(index)) {
+            TileRun lowerTileRun = new TileRun(set.subList(0, index));
+            TileRun upperTileRun = new TileRun(set.subList(index, set.size()));
+            lowerTileRun.add(tile);
+            assert (set.size() + 1 == lowerTileRun.size() + upperTileRun.size());
+            return Arrays.asList(lowerTileRun, upperTileRun);
+        }
+        throw new IllegalArgumentException(format("Can't split %s with %s @ %d", set, tile, index));
     }
 
     /**

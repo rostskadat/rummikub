@@ -20,15 +20,15 @@ import com.afb.ml.rummikub.model.TileSet;
 import com.afb.ml.rummikub.services.TableController;
 
 /**
- * This strategy plays at "random"
+ * This strategy plays by maximizing the number of tile played at each turn.
  * 
  * @author rostskadat
  *
  */
 @Service
-public class RandomStrategy implements IStrategy {
+public class MaximumRewardStrategy implements IStrategy {
 
-    private static final Log LOG = LogFactory.getLog(RandomStrategy.class);
+    private static final Log LOG = LogFactory.getLog(MaximumRewardStrategy.class);
 
     @Autowired
     private TableController tableController;
@@ -120,12 +120,13 @@ public class RandomStrategy implements IStrategy {
         for (TileSet set : table) {
             if (set instanceof TileRun) {
                 TileRun run = (TileRun) set;
-                if (helper.canShiftRun(run, tile)) {
-                    helper.shiftRun(run, tile);
-                    // Not touching tableSets because these are the same underlying tileSet
+                List<Integer> shifts = helper.getShiftRunIndexes(run, tile);
+                List<Integer> splits = helper.getShiftRunIndexes(run, tile);
+                if (!shifts.isEmpty()) {
+                    helper.shiftRun(run, tile, shifts.get(0));
                     return true;
-                } else if (helper.canSplitRun(run, tile)) {
-                    List<TileRun> newRuns = helper.splitRun(run, tile);
+                } else if (!splits.isEmpty()) {
+                    List<TileRun> newRuns = helper.splitRun(run, tile, splits.get(0));
                     tableController.removeTileSet(run);
                     tableController.addAllTileSets(newRuns);
                     return true;
@@ -134,6 +135,7 @@ public class RandomStrategy implements IStrategy {
                 TileGroup group = (TileGroup) set;
                 if (helper.canSubstituteInGroup(group, tile)) {
                     // NA
+                    LOG.warn("NOT IMPLEMENTED");
                     return true;
                 }
             }

@@ -189,14 +189,14 @@ public class StrategyHelperTest extends AbstractUnitTest {
     public void testShiftRun_01() {
         TileRun run = Utils.getTileRun(helper, 2, 4, TileColor.BLACK);
         TileRun expected = Utils.getTileRun(helper, 1, 4, TileColor.BLACK);
-        assertThat(helper.shiftRun(run, new Tile(1, TileColor.BLACK)), equalTo(expected));
+        assertThat(helper.shiftRun(run, new Tile(1, TileColor.BLACK), 0), equalTo(expected));
     }
 
     @Test
     public void testShiftRun_02() {
         TileRun run = Utils.getTileRun(helper, 2, 4, TileColor.BLACK);
         TileRun expected = Utils.getTileRun(helper, 2, 5, TileColor.BLACK);
-        assertThat(helper.shiftRun(run, new Tile(5, TileColor.BLACK)), equalTo(expected));
+        assertThat(helper.shiftRun(run, new Tile(5, TileColor.BLACK), 3), equalTo(expected));
     }
 
     @Test
@@ -205,31 +205,31 @@ public class StrategyHelperTest extends AbstractUnitTest {
         TileRun expected = Utils.getTileRun(helper, 2, 4, TileColor.BLACK);
         expected.add(0, new Tile(TileColor.BLACK));
         // XXX How does that work with a jocker in between
-        assertThat(helper.shiftRun(run, new Tile(TileColor.BLACK)), equalTo(expected));
+        assertThat(helper.shiftRun(run, new Tile(TileColor.BLACK), 0), equalTo(expected));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testShiftRun_04() {
         TileRun run = Utils.getTileRun(helper, 3, 5, TileColor.BLACK);
-        helper.shiftRun(run, new Tile(1, TileColor.BLACK));
+        helper.shiftRun(run, new Tile(1, TileColor.BLACK), 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testShiftRun_05() {
         TileRun run = Utils.getTileRun(helper, 3, 5, TileColor.BLACK);
-        helper.shiftRun(run, new Tile(7, TileColor.BLACK));
+        helper.shiftRun(run, new Tile(7, TileColor.BLACK), run.size());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testShiftRun_06() {
         TileRun run = Utils.getTileRun(helper, 3, 5, TileColor.BLACK);
-        helper.shiftRun(run, new Tile(4, TileColor.BLACK));
+        helper.shiftRun(run, new Tile(4, TileColor.BLACK), run.size() - 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitRun_01() {
         TileRun run = Utils.getTileRun(helper, 2, 5, TileColor.BLACK);
-        helper.splitRun(run, new Tile(4, TileColor.BLACK));
+        helper.splitRun(run, new Tile(4, TileColor.BLACK), run.size() - 1);
     }
 
     @Test
@@ -237,20 +237,20 @@ public class StrategyHelperTest extends AbstractUnitTest {
         TileRun run = Utils.getTileRun(helper, 2, 6, TileColor.BLACK);
         TileRun expected1 = Utils.getTileRun(helper, 2, 4, TileColor.BLACK);
         TileRun expected2 = Utils.getTileRun(helper, 4, 6, TileColor.BLACK);
-        List<TileRun> splits = helper.splitRun(run, new Tile(4, TileColor.BLACK));
+        List<TileRun> splits = helper.splitRun(run, new Tile(4, TileColor.BLACK), 2);
         assertThat(splits.containsAll(Arrays.asList(new TileRun[] { expected1, expected2 })), equalTo(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitRun_03() {
         TileRun run = Utils.getTileRun(helper, 2, 7, TileColor.BLACK);
-        helper.splitRun(run, new Tile(2, TileColor.BLACK));
+        helper.splitRun(run, new Tile(2, TileColor.BLACK), 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitRun_04() {
         TileRun run = Utils.getTileRun(helper, 2, 7, TileColor.BLACK);
-        helper.splitRun(run, new Tile(3, TileColor.BLACK));
+        helper.splitRun(run, new Tile(3, TileColor.BLACK), run.size() - 1);
     }
 
     @Test
@@ -258,7 +258,7 @@ public class StrategyHelperTest extends AbstractUnitTest {
         TileRun run = Utils.getTileRun(helper, 2, 7, TileColor.BLACK);
         TileRun expected1 = Utils.getTileRun(helper, 2, 4, TileColor.BLACK);
         TileRun expected2 = Utils.getTileRun(helper, 4, 7, TileColor.BLACK);
-        List<TileRun> splits = helper.splitRun(run, new Tile(4, TileColor.BLACK));
+        List<TileRun> splits = helper.splitRun(run, new Tile(4, TileColor.BLACK), 2);
         assertThat(splits.containsAll(Arrays.asList(new TileRun[] { expected1, expected2 })), equalTo(true));
     }
 
@@ -267,38 +267,38 @@ public class StrategyHelperTest extends AbstractUnitTest {
         TileRun run = Utils.getTileRun(helper, 2, 7, TileColor.BLACK);
         TileRun expected1 = Utils.getTileRun(helper, 2, 5, TileColor.BLACK);
         TileRun expected2 = Utils.getTileRun(helper, 5, 7, TileColor.BLACK);
-        List<TileRun> splits = helper.splitRun(run, new Tile(5, TileColor.BLACK));
+        List<TileRun> splits = helper.splitRun(run, new Tile(5, TileColor.BLACK), 3);
         assertThat(splits.containsAll(Arrays.asList(new TileRun[] { expected1, expected2 })), equalTo(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitRun_07() {
         TileRun run = Utils.getTileRun(helper, 2, 7, TileColor.BLACK);
-        helper.splitRun(run, new Tile(6, TileColor.BLACK));
+        helper.splitRun(run, new Tile(6, TileColor.BLACK), run.size() - 2);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitRun_08() {
         TileRun run = Utils.getTileRun(helper, 2, 7, TileColor.BLACK);
-        helper.splitRun(run, new Tile(7, TileColor.BLACK));
+        helper.splitRun(run, new Tile(7, TileColor.BLACK), run.size() - 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitRun_09() {
         TileRun run = Utils.getTileRun(helper, 2, 7, TileColor.BLACK);
-        helper.splitRun(run, new Tile(8, TileColor.BLACK));
+        helper.splitRun(run, new Tile(8, TileColor.BLACK), run.size());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitRun_10() {
         TileRun run = Utils.getTileRun(helper, 2, 7, TileColor.BLACK);
-        helper.splitRun(run, new Tile(4, TileColor.RED));
+        helper.splitRun(run, new Tile(4, TileColor.RED), 2);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testSplitRun_11() {
         TileRun run = Utils.getTileRun(helper, 2, 5, TileColor.BLACK);
-        helper.splitRun(run, new Tile(TileColor.BLACK));
+        helper.splitRun(run, new Tile(TileColor.BLACK), 2);
     }
 
     @Test
@@ -307,7 +307,7 @@ public class StrategyHelperTest extends AbstractUnitTest {
         TileRun expected1 = Utils.getTileRun(helper, 2, 3, TileColor.BLACK);
         expected1.add(new Tile(TileColor.BLACK));
         TileRun expected2 = Utils.getTileRun(helper, 4, 6, TileColor.BLACK);
-        List<TileRun> splits = helper.splitRun(run, new Tile(TileColor.BLACK));
+        List<TileRun> splits = helper.splitRun(run, new Tile(TileColor.BLACK), 2);
         assertThat(splits.containsAll(Arrays.asList(new TileRun[] { expected1, expected2 })), equalTo(true));
     }
 
