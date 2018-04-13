@@ -2,6 +2,11 @@ package net.pictulog.ml.rummikub.model;
 
 import java.io.Serializable;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Tile implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -29,30 +34,6 @@ public class Tile implements Serializable {
         this.number = null;
         this.color = color;
         this.joker = true;
-    }
-
-    public Integer getNumber() {
-        return number;
-    }
-
-    public void setNumber(Integer number) {
-        this.number = number;
-    }
-
-    public TileColor getColor() {
-        return color;
-    }
-
-    public void setColor(TileColor color) {
-        this.color = color;
-    }
-
-    public boolean isJoker() {
-        return joker;
-    }
-
-    public void setJoker(boolean joker) {
-        this.joker = joker;
     }
 
     @Override

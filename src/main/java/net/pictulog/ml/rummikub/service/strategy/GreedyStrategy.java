@@ -8,7 +8,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import net.pictulog.ml.rummikub.model.Player;
 import net.pictulog.ml.rummikub.model.Rack;
@@ -25,16 +26,18 @@ import net.pictulog.ml.rummikub.service.TableController;
  * @author rostskadat
  *
  */
-@Service
+@Component
 public class GreedyStrategy implements IStrategy {
 
     private static final Log LOG = LogFactory.getLog(GreedyStrategy.class);
 
+    @Value("${initialScoreThreshold:30}")
+    private int initialScoreThreshold;
+
     @Autowired
     private TableController tableController;
 
-    @Autowired
-    private StrategyHelper helper;
+    private StrategyHelper helper = new StrategyHelper();
 
     @Override
     public boolean play(Player player) {
@@ -49,7 +52,7 @@ public class GreedyStrategy implements IStrategy {
 
     protected boolean playInitialRound(Player player) {
         // I need to start with at least one TileRun or TileGroup worth 30 points
-        List<TileSet> initialTileSets = helper.getInitialTileSets(player.getRack());
+        List<TileSet> initialTileSets = helper.getInitialTileSets(player.getRack(), initialScoreThreshold);
         if (!initialTileSets.isEmpty()) {
             // XXX: what is the best initial move? lot of small tiles or the big tiles first?
             TileSet initialTileSet = initialTileSets.get(0);

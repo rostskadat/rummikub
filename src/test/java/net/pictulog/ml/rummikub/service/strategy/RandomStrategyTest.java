@@ -32,8 +32,7 @@ public class RandomStrategyTest extends AbstractUnitTest {
     @Autowired
     PoolController poolController;
 
-	@Autowired
-	private StrategyHelper helper;
+    private StrategyHelper helper = new StrategyHelper();
 	
     @Before
     public void before() {

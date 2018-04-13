@@ -9,9 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import net.pictulog.ml.rummikub.model.Rack;
 import net.pictulog.ml.rummikub.model.Tile;
 import net.pictulog.ml.rummikub.model.TileColor;
@@ -27,11 +24,7 @@ import net.pictulog.ml.rummikub.model.TileSet;
  * @author rostskadat
  *
  */
-@Service
 public class StrategyHelper {
-
-    @Value("${initialScoreThreshold:30}")
-    private int initialScoreThreshold;
 
     /**
      * This method returns the sets that are valid for an Initial move (whose score is more than
@@ -41,7 +34,7 @@ public class StrategyHelper {
      *            the {@link Rack} from which to draw the {@link Tile}
      * @return The {@link List} (possibly empty) of valid initial {@link TileSet}
      */
-    public List<TileSet> getInitialTileSets(Rack rack) {
+    public List<TileSet> getInitialTileSets(Rack rack, int initialScoreThreshold) {
         final List<TileSet> initialTileSets = new ArrayList<>();
         // XXX: What about the group of sets whose combined score reaches the threshold?
         getValidTileSets(rack).forEach(set -> {

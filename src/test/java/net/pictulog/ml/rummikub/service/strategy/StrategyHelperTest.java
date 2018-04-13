@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.assertj.core.util.Arrays;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import net.pictulog.ml.rummikub.AbstractUnitTest;
 import net.pictulog.ml.rummikub.model.Rack;
@@ -19,8 +19,10 @@ import net.pictulog.ml.rummikub.model.TileSet;
 
 public class StrategyHelperTest extends AbstractUnitTest {
 
-    @Autowired
-    private StrategyHelper helper;
+    @Value("${initialScoreThreshold:30}")
+    private int initialScoreThreshold;
+
+    StrategyHelper helper = new StrategyHelper();
 
     @Test
     public void testGetInitialTileSets_01() {
@@ -28,7 +30,7 @@ public class StrategyHelperTest extends AbstractUnitTest {
 
         Utils.addTileRun(helper, rack, 1, 3, TileColor.BLACK);
 
-        List<TileSet> initialTileSets = helper.getInitialTileSets(rack);
+        List<TileSet> initialTileSets = helper.getInitialTileSets(rack, initialScoreThreshold);
         assertThat(initialTileSets.size(), equalTo(0));
     }
 
@@ -40,7 +42,7 @@ public class StrategyHelperTest extends AbstractUnitTest {
         Utils.addTileRun(helper, rack, 4, 6, TileColor.RED);
         Utils.addTileGroup(helper, rack, 6, TileColor.values());
 
-        List<TileSet> initialTileSets = helper.getInitialTileSets(rack);
+        List<TileSet> initialTileSets = helper.getInitialTileSets(rack, initialScoreThreshold);
         assertThat(initialTileSets.size(), equalTo(1));
         assertThat(initialTileSets.get(0), equalTo(expected));
     }
