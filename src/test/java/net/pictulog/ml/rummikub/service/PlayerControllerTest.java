@@ -28,12 +28,6 @@ public class PlayerControllerTest extends AbstractUnitTest {
         assertThat(players, notNullValue());
         assertThat(players.isEmpty(), equalTo(false));
         assertThat(players.size(), equalTo(numberOfPlayer));
-        players.remove(0);
-        playerController.setPlayers(players);
-        players = playerController.getPlayers();
-        assertThat(players, notNullValue());
-        assertThat(players.isEmpty(), equalTo(false));
-        assertThat(players.size(), equalTo(numberOfPlayer - 1));
     }
 
     @Test

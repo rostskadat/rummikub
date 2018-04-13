@@ -3,7 +3,9 @@ package net.pictulog.ml.rummikub.service;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -33,7 +35,7 @@ public class PlayerController {
     @Value("${jockerPenality:30}")
     private int jockerPenality;
 
-    private List<Player> players;
+    private Map<Player, IStrategy> players;
 
     @Autowired
     private IStrategy strategy;
@@ -49,25 +51,22 @@ public class PlayerController {
 
     @PostConstruct
     private void postConstruct() {
-        players = new ArrayList<>();
         LOG.debug("Creating players...");
+        players = new HashMap<>();
         for (int i = 0; i < numberOfPlayer; i++) {
-            players.add(new Player(format("Player_%d", i)));
+            players.put(new Player(format("Player_%d", i)), strategy);
         }
         LOG.debug("Drawing initial tiles...");
-        for (Player player : players) {
+        for (Player player : players.keySet()) {
             for (int i = 0; i < numberOfTilesPerPlayer; i++) {
                 player.addTileToRack(poolController.drawTileFromPool());
             }
         }
+
     }
 
     public List<Player> getPlayers() {
-        return players;
-    }
-
-    public void setPlayers(List<Player> players) {
-        this.players = players;
+        return new ArrayList<>(players.keySet());
     }
 
     public void play(int rounds) {
@@ -95,8 +94,9 @@ public class PlayerController {
 
     private boolean playRound() {
         boolean hasPlayedInThisRound = false;
-        for (Player player : players) {
-            if (strategy.play(player)) {
+        for (Map.Entry<Player, IStrategy> entry : players.entrySet()) {
+            Player player = entry.getKey();
+            if (entry.getValue().play(player)) {
                 if (player.isFinished()) {
                     LOG.debug(format("Player %s has finished!", player.getName()));
                     break;
@@ -123,7 +123,7 @@ public class PlayerController {
         }
         sb.append(EOL).append("Pool (").append(poolController.getPoolSize()).append("): ")
                 .append(poolController.getPool());
-        for (Player player : players) {
+        for (Player player : players.keySet()) {
             sb.append(EOL).append("Player ").append(player.getName()).append(": ")
                     .append(player.getRack());
         }
@@ -135,7 +135,7 @@ public class PlayerController {
     private Player getWinner() {
         Player winner = null;
         int smallestScore = -1;
-        for (Player player : players) {
+        for (Player player : players.keySet()) {
             Rack rack = player.getRack();
             int score = 0;
             for (Tile tile : rack) {
