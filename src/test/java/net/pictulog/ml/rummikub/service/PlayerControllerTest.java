@@ -39,7 +39,7 @@ public class PlayerControllerTest extends AbstractUnitTest {
     @Test
     @DirtiesContext
     public void testPlay() {
-        playerController.play();
+        playerController.play(1);
     }
 
 }

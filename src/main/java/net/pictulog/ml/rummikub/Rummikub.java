@@ -26,6 +26,10 @@ public class Rummikub implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        rummikubController.play();
+        int rounds = 1;
+        if (args.containsOption("rounds")) {
+            rounds = Integer.valueOf(args.getOptionValues("rounds").get(0));
+        }
+        rummikubController.play(rounds);
     }
 }

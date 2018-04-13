@@ -70,25 +70,27 @@ public class PlayerController {
         this.players = players;
     }
 
-    public void play() {
-        LOG.info("Playing Rummikub now...");
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(getGameStatus("Starting with:"));
-        }
-        int roundNumber = 0;
-        boolean hasPlayedInThisRound = false;
-        do {
-            hasPlayedInThisRound = playRound();
+    public void play(int rounds) {
+        for (int i = 0; i < rounds; i++) {
+            LOG.info("Playing Rummikub now...");
             if (LOG.isDebugEnabled()) {
-                LOG.debug(getGameStatus(format("Round %d:", roundNumber)));
+                LOG.debug(getGameStatus("Starting with:"));
             }
-            roundNumber++;
-        } while (!isGameBlocked(hasPlayedInThisRound));
-        if (isGameBlocked(hasPlayedInThisRound)) {
-            LOG.warn(format("Game blocked on round %d", roundNumber));
+            int roundNumber = 0;
+            boolean hasPlayedInThisRound = false;
+            do {
+                hasPlayedInThisRound = playRound();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(getGameStatus(format("Round %d:", roundNumber)));
+                }
+                roundNumber++;
+            } while (!isGameBlocked(hasPlayedInThisRound));
+            if (isGameBlocked(hasPlayedInThisRound)) {
+                LOG.warn(format("Game blocked on round %d", roundNumber));
+            }
+            gameStateController.saveGameFinalState();
+            getWinner();
         }
-        gameStateController.saveGameFinalState();
-        getWinner();
     }
 
     private boolean playRound() {

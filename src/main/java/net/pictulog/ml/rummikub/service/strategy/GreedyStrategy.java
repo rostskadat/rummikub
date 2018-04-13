@@ -26,9 +26,9 @@ import net.pictulog.ml.rummikub.service.TableController;
  *
  */
 @Service
-public class MaximumRewardStrategy implements IStrategy {
+public class GreedyStrategy implements IStrategy {
 
-    private static final Log LOG = LogFactory.getLog(MaximumRewardStrategy.class);
+    private static final Log LOG = LogFactory.getLog(GreedyStrategy.class);
 
     @Autowired
     private TableController tableController;
