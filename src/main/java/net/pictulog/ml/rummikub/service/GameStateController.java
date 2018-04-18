@@ -20,12 +20,11 @@ import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import net.pictulog.ml.rummikub.model.GameState;
 import net.pictulog.ml.rummikub.model.Pool;
 import net.pictulog.ml.rummikub.model.Tile;
-
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 @Controller
 public class GameStateController {
@@ -84,6 +83,22 @@ public class GameStateController {
         assert (nextTileIndex != -1);
         drawnTileIndexes.add(nextTileIndex);
         return pool.remove(nextTileIndex);
+    }
+
+    public Tile lookAhead(Pool pool, int offset) {
+        int nextTileIndex = -1;
+        if (useSavedGame && !tileIndexesFromPreviousGame.isEmpty() && offset < tileIndexesFromPreviousGame.size()) {
+            nextTileIndex = tileIndexesFromPreviousGame.get(offset);
+        } else {
+            // I need to make sure that I'm not picking twice the same tile
+            do {
+                nextTileIndex = ThreadLocalRandom.current().nextInt(0, pool.size());
+            } while (drawnTileIndexes.contains(nextTileIndex));
+        }
+        assert (nextTileIndex != -1);
+        assert (nextTileIndex < pool.size());
+        drawnTileIndexes.add(nextTileIndex);
+        return pool.get(nextTileIndex);
     }
 
     public void saveGameFinalState() {

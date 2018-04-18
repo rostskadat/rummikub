@@ -1,6 +1,12 @@
 package net.pictulog.ml.rummikub.service.strategy;
 
 import static java.lang.String.format;
+import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.canSubstituteInGroup;
+import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.getInitialTileSets;
+import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.getShiftRunIndexes;
+import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.getValidTileSets;
+import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.shiftRun;
+import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.splitRun;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +43,6 @@ public class GreedyStrategy implements IStrategy {
     @Autowired
     private TableController tableController;
 
-    private StrategyHelper helper = new StrategyHelper();
-
     @Override
     public boolean play(Player player) {
         boolean hasPlayed = false;
@@ -52,7 +56,7 @@ public class GreedyStrategy implements IStrategy {
 
     protected boolean playInitialRound(Player player) {
         // I need to start with at least one TileRun or TileGroup worth 30 points
-        List<TileSet> initialTileSets = helper.getInitialTileSets(player.getRack(), initialScoreThreshold);
+        List<TileSet> initialTileSets = getInitialTileSets(player.getRack(), initialScoreThreshold);
         if (!initialTileSets.isEmpty()) {
             // XXX: what is the best initial move? lot of small tiles or the big tiles first?
             TileSet initialTileSet = initialTileSets.get(0);
@@ -75,7 +79,7 @@ public class GreedyStrategy implements IStrategy {
         boolean hasPlayed = false;
 
         Rack rack = player.getRack();
-        List<TileSet> validTileSets = helper.getValidTileSets(rack);
+        List<TileSet> validTileSets = getValidTileSets(rack);
         validTileSets.forEach(set -> {
             LOG.debug(format("Player %s added %s", player.getName(), set));
             player.removeAllTilesFromRack(set);
@@ -123,20 +127,20 @@ public class GreedyStrategy implements IStrategy {
         for (TileSet set : table) {
             if (set instanceof TileRun) {
                 TileRun run = (TileRun) set;
-                List<Integer> shifts = helper.getShiftRunIndexes(run, tile);
-                List<Integer> splits = helper.getShiftRunIndexes(run, tile);
+                List<Integer> shifts = getShiftRunIndexes(run, tile);
+                List<Integer> splits = getShiftRunIndexes(run, tile);
                 if (!shifts.isEmpty()) {
-                    helper.shiftRun(run, tile, shifts.get(0));
+                    shiftRun(run, tile, shifts.get(0));
                     return true;
                 } else if (!splits.isEmpty()) {
-                    List<TileRun> newRuns = helper.splitRun(run, tile, splits.get(0));
+                    List<TileRun> newRuns = splitRun(run, tile, splits.get(0));
                     tableController.removeTileSet(run);
                     tableController.addAllTileSets(newRuns);
                     return true;
                 }
             } else if (set instanceof TileGroup) {
                 TileGroup group = (TileGroup) set;
-                if (helper.canSubstituteInGroup(group, tile)) {
+                if (canSubstituteInGroup(group, tile)) {
                     // NA
                     LOG.warn("NOT IMPLEMENTED");
                     return true;

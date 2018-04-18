@@ -1,6 +1,7 @@
 package net.pictulog.ml.rummikub.service.strategy;
 
 import static java.lang.String.format;
+import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.getInitialTileSets;
 
 import java.util.List;
 
@@ -9,6 +10,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import net.pictulog.ml.rummikub.algo.Negamax;
+import net.pictulog.ml.rummikub.model.Game;
+import net.pictulog.ml.rummikub.model.Move;
 import net.pictulog.ml.rummikub.model.Player;
 import net.pictulog.ml.rummikub.model.Pool;
 import net.pictulog.ml.rummikub.model.Rack;
@@ -45,8 +49,6 @@ public class OracleStrategy implements IStrategy {
     @Autowired
     private PoolController poolController;
 
-    private StrategyHelper helper = new StrategyHelper();
-
     @Override
     public boolean play(Player player) {
         boolean hasPlayed = false;
@@ -60,7 +62,7 @@ public class OracleStrategy implements IStrategy {
 
     protected boolean playInitialRound(Player player) {
         // I need to start with at least one TileRun or TileGroup worth 30 points
-        List<TileSet> initialTileSets = helper.getInitialTileSets(player.getRack(), initialScoreThreshold);
+        List<TileSet> initialTileSets = getInitialTileSets(player.getRack(), initialScoreThreshold);
         if (!initialTileSets.isEmpty()) {
             // XXX: what is the best initial move? lot of small tiles or the big tiles first?
             TileSet initialTileSet = initialTileSets.get(0);
@@ -75,24 +77,15 @@ public class OracleStrategy implements IStrategy {
     }
 
     protected boolean playNormalRound(Player player) {
-        // A normal round is played as follow:
-        // 1- Add all the TileSets I have in the rack.
-        // 2- Check if I can add any of the remaining Tiles.
-        // 2.1- If so add it, and repeat.
-        // 2.2- If no tile can be added, exit
-        boolean hasPlayed = false;
-
-        Rack rack = player.getRack();
-        List<TileSet> validTileSets = helper.getValidTileSets(rack);
-        validTileSets.forEach(set -> {
-            LOG.debug(format("Player %s added %s", player.getName(), set));
-            player.removeAllTilesFromRack(set);
-            tableController.addTileSet(set);
-        });
-        if (!validTileSets.isEmpty()) {
-            hasPlayed = true;
+        Game game = new Game();
+        List<Move> moves = game.getPossibleMoves(player);
+        if (moves.size() == 1) {
+            game.playMove(player, moves.get(0));
+        } else {
+            Negamax.Pair pair = Negamax.negamax(game, moves.get(0), 0, player);
+            game.playMove(player, pair.getMove());
         }
-        return hasPlayed;
+        return true;
     }
 
 }

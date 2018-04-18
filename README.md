@@ -37,4 +37,11 @@ In our case Q(s, a) expected value of taking action a in state s.
 * [3] [Reinforcement Learning for Board Games: The Temporal Difference Algorithm](http://www.gm.fh-koeln.de/ciopwebpub/Kone15c.d/TR-TDgame_EN.pdf)
 * [4] [Multi-Stage Temporal Difference Learning for 2048-like Games](https://pdfs.semanticscholar.org/e11f/23691ca8f6dabbf701c367d9c09882e1690f.pdf)
 * [5] [A Gentle Introduction to Reinforcement Learning](http://www.springer.com/cda/content/document/cda_downloaddocument/9783319458557-c2.pdf?SGWID=0-0-45-1586969-p180225375)
+* [6] [AI Mahjong](http://cs229.stanford.edu/proj2009/Loh.pdf)
+* [7] [DominAI](https://drive.google.com/open?id=1Axc0kvnM7QGYk0X7vewBACbpawsK-zjM)
+* [8] [Giraffe](https://drive.google.com/open?id=1Y-l5--nAR6YgXh91HzbSM6Y8HRXv12A9)
+
+
+
+
 

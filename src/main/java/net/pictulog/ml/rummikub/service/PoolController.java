@@ -30,10 +30,20 @@ public class PoolController {
         resetPool();
     }
 
+    /**
+     * This method returns the next {@link Tile} from the pool. This {@link Tile} can be either drawn randomly or, when
+     * replaying a previously played game, drawn from the list of previously played {@link Tile}s.
+     * 
+     * @return the next {@link Tile} from the pool
+     */
     public Tile drawTileFromPool() {
         // I delegate to the game state controller in order to make sure that the tile are drawn in the same order as
         // the previous game if I'm in replay mode
         return gameStateController.getNextTile(pool);
+    }
+
+    public Tile lookAhead(int offset) {
+        return gameStateController.lookAhead(pool, offset);
     }
 
     public int getPoolSize() {

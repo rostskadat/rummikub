@@ -1,12 +1,18 @@
 package net.pictulog.ml.rummikub;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import net.pictulog.ml.rummikub.service.PlayerController;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 /**
  * A simple implementation of <a href="https://en.wikipedia.org/wiki/Rummikub">Rummikub</a>
@@ -14,22 +20,53 @@ import net.pictulog.ml.rummikub.service.PlayerController;
  * @author rostskadat
  *
  */
+@Component
 @SpringBootApplication
-public class Rummikub implements ApplicationRunner {
+public class Rummikub {
 
-    @Autowired
-    private PlayerController rummikubController;
+    private static final Logger LOG = LoggerFactory.getLogger(Rummikub.class);
+
+    @Value("${server.address:127.0.0.1}")
+    private String serverAddress;
+
+    @Value("${server.port:8080}")
+    private Integer serverPort;
+
+    @Value("${server.ssl.enabled:false}")
+    private Boolean serverSslEnable;
 
     public static void main(String[] args) {
         SpringApplication.run(Rummikub.class, args);
     }
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        int rounds = 1;
-        if (args.containsOption("rounds")) {
-            rounds = Integer.valueOf(args.getOptionValues("rounds").get(0));
-        }
-        rummikubController.play(rounds);
+    @EventListener({ ApplicationReadyEvent.class })
+    private void applicationReadyEvent() {
+        openBrowser();
     }
+
+    private void openBrowser() {
+        String url = String.format("%s://%s:%d/rummikub", (serverSslEnable ? "https" : "http"),
+                serverAddress, serverPort);
+        if (LOG.isInfoEnabled()) {
+            LOG.info(String.format("Application started ... Launching browser @ %s", url));
+        }
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            try {
+                desktop.browse(new URI(url));
+            } catch (IOException | URISyntaxException e) {
+                LOG.error(e.getMessage(), e);
+                LOG.error(String.format("Try opening your browser at %s", url));
+            }
+        } else {
+            Runtime runtime = Runtime.getRuntime();
+            try {
+                runtime.exec("rundll32 url.dll,FileProtocolHandler " + url);
+            } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
+                LOG.error(String.format("Try opening your browser at %s", url));
+            }
+        }
+    }
+
 }

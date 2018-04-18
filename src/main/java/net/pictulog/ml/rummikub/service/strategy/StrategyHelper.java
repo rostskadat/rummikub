@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.pictulog.ml.rummikub.model.Move;
 import net.pictulog.ml.rummikub.model.Rack;
+import net.pictulog.ml.rummikub.model.Table;
 import net.pictulog.ml.rummikub.model.Tile;
 import net.pictulog.ml.rummikub.model.TileColor;
 import net.pictulog.ml.rummikub.model.TileGroup;
@@ -26,6 +28,10 @@ import net.pictulog.ml.rummikub.model.TileSet;
  */
 public class StrategyHelper {
 
+    private StrategyHelper() {
+        // NA
+    }
+
     /**
      * This method returns the sets that are valid for an Initial move (whose score is more than
      * {@code initialScoreThreshold} (30)).
@@ -34,7 +40,7 @@ public class StrategyHelper {
      *            the {@link Rack} from which to draw the {@link Tile}
      * @return The {@link List} (possibly empty) of valid initial {@link TileSet}
      */
-    public List<TileSet> getInitialTileSets(Rack rack, int initialScoreThreshold) {
+    public static List<TileSet> getInitialTileSets(Rack rack, int initialScoreThreshold) {
         final List<TileSet> initialTileSets = new ArrayList<>();
         // XXX: What about the group of sets whose combined score reaches the threshold?
         getValidTileSets(rack).forEach(set -> {
@@ -54,7 +60,7 @@ public class StrategyHelper {
      *            the Rack to extract the {@link TileSet} from
      * @return The highest scored {@link TileSet}
      */
-    public TileSet getHighestTileSet(Rack rack) {
+    public static TileSet getHighestTileSet(Rack rack) {
         List<TileSet> validTileSets = getValidTileSets(rack);
         int highestScore = 0;
         TileSet highestTileSet = null;
@@ -70,13 +76,14 @@ public class StrategyHelper {
 
     /**
      * This method returns all the valid {@link TilSet} found in the {@link Rack}. A {@link TileSet} is considered valid
-     * if it has at least 3 {@link Tile}.
+     * if it has at least 3 {@link Tile}. <br/>
+     * <b>NOTE:</b> a specific {@link Tile} from the {@link Rack} can be found in different {@link TilSet}.
      * 
      * @param rack
-     *            The {@link Rack} containing the {@link Tile}
+     *            The {@link Rack} containing the player's {@link Tile}s.
      * @return a {@link List} of valid {@link TilSet}
      */
-    public List<TileSet> getValidTileSets(Rack rack) {
+    public static List<TileSet> getValidTileSets(Rack rack) {
         int size = rack.size();
         Map<Tile, TileRun> runs = new HashMap<>(size);
         Map<Tile, TileGroup> groups = new HashMap<>(size);
@@ -116,10 +123,11 @@ public class StrategyHelper {
                 validTileSets.add(set);
             }
         });
+        // XXX: What about 1,2,3,4 BLACK? Should it be 1 or 3 TileRuns (1,2,3 BLACK / 1,2,3,4 BLACK / 2,3,4 BLACK)?
         return validTileSets;
     }
 
-    private void addTileFromRackToTileSet(Rack rack, int index, TileSet tileSet) {
+    private static void addTileFromRackToTileSet(Rack rack, int index, TileSet tileSet) {
         assert (index < rack.size());
 
         Tile tile = rack.get(index);
@@ -140,33 +148,44 @@ public class StrategyHelper {
      *            the {@link Tile} to add
      * @return whether the {@link Tile} {@code tileToAdd} can be added
      */
-    public boolean canAddToSet(TileSet tileSet, Tile tileToAdd) {
-    	return (tileSet instanceof TileGroup) ? canAddToSet((TileGroup) tileSet, tileToAdd) : canAddToSet((TileRun) tileSet, tileToAdd);
+    public static boolean canAddToSet(TileSet tileSet, Tile tileToAdd) {
+        return (tileSet instanceof TileGroup) ? canAddToTileGroup(tileSet, tileToAdd)
+                : canAddToTileRun(tileSet, tileToAdd);
     }
-    
 
-    private boolean canAddToSet(TileGroup group, Tile tileToAdd) {
-    	if (group.size() >= 4) {
-			return false;
-		}
+    private static boolean canAddToTileGroup(TileSet tileSet, Tile tileToAdd) {
+        if (!(tileSet instanceof TileGroup)) {
+            return false;
+        }
+        TileGroup group = (TileGroup) tileSet;
+        if (group.size() >= 4) {
+            return false;
+        }
+        if (group.isEmpty()) {
+            return true;
+        }
         if (tileToAdd.isJoker()) {
             return !group.containsJocker(tileToAdd);
-		}
-		TileColor colorToAdd = tileToAdd.getColor();
-		boolean seenTileColorToAdd = false;
-		int groupNumber = -1;
-		for (Tile tile : group) {
-			if (!tile.isJoker()) {
-				groupNumber = tile.getNumber();
-			}
-			if (colorToAdd.equals(tile.getColor())) {
-				seenTileColorToAdd = true;
-			}
-		}
+        }
+        TileColor colorToAdd = tileToAdd.getColor();
+        boolean seenTileColorToAdd = false;
+        int groupNumber = -1;
+        for (Tile tile : group) {
+            if (!tile.isJoker()) {
+                groupNumber = tile.getNumber();
+            }
+            if (colorToAdd.equals(tile.getColor())) {
+                seenTileColorToAdd = true;
+            }
+        }
         return (tileToAdd.getNumber() == groupNumber && !seenTileColorToAdd);
     }
 
-    private boolean canAddToSet(TileRun run, Tile tileToAdd) {
+    private static boolean canAddToTileRun(TileSet tileSet, Tile tileToAdd) {
+        if (!(tileSet instanceof TileRun)) {
+            return false;
+        }
+        TileRun run = (TileRun) tileSet;
         if (run.isEmpty()) {
             return true;
         }
@@ -186,7 +205,6 @@ public class StrategyHelper {
                 && (lowestBound == null || (lowestBound == tileNumber + 1) || (upperBound == tileNumber - 1)));
     }
 
-
     /**
      * This method insert a tile to the correct spot in the set and returns the index of the position it was inserted at
      * 
@@ -194,28 +212,34 @@ public class StrategyHelper {
      *            the {@link Tile} to add
      * @return the index of the position it was inserted at
      */
-    public int addToSet(TileSet tileSet, Tile tileToAdd) {
-    	return (tileSet instanceof TileGroup) ? addToSet((TileGroup) tileSet, tileToAdd) : addToSet((TileRun) tileSet, tileToAdd);
+    public static int addToSet(TileSet tileSet, Tile tileToAdd) {
+        return (tileSet instanceof TileGroup) ? addToTileGroup(tileSet, tileToAdd)
+                : addToTileRun(tileSet, tileToAdd);
     }
-    
-    private int addToSet(TileGroup group, Tile tileToAdd) {
+
+    private static int addToTileGroup(TileSet tileSet, Tile tileToAdd) {
+        if (!canAddToSet(tileSet, tileToAdd)) {
+            throw new IllegalArgumentException("Tile can't be added to set");
+        }
+        TileGroup group = (TileGroup) tileSet;
         group.add(tileToAdd);
         return 0;
     }
 
-    private int addToSet(TileRun run, Tile tileToAdd) {
-        if (!canAddToSet(run, tileToAdd)) {
+    private static int addToTileRun(TileSet tileSet, Tile tileToAdd) {
+        if (!canAddToSet(tileSet, tileToAdd)) {
             throw new IllegalArgumentException("Tile can't be added to set");
         }
+        TileRun run = (TileRun) tileSet;
         if (run.isEmpty() || tileToAdd.isJoker()) {
             // XXX: Does it depend on the strategy when dealing with a Joker?
-        	run.add(0, tileToAdd);
+            run.add(0, tileToAdd);
             return 0;
         }
         Integer lowestBound = run.getLowerBound();
         Integer tileNumber = tileToAdd.getNumber();
         if (lowestBound == null || lowestBound == tileNumber + 1) {
-        	run.add(0, tileToAdd);
+            run.add(0, tileToAdd);
             return 0;
         }
         run.add(tileToAdd);
@@ -230,7 +254,7 @@ public class StrategyHelper {
      * @param tile
      * @return
      */
-    public List<Integer> getShiftRunIndexes(TileRun set, Tile tile) {
+    public static List<Integer> getShiftRunIndexes(TileRun set, Tile tile) {
         if (tile.isJoker()) {
             // XXX: Is that correct when the TileRun already contains a Jocker. Check definition of Tile.equals
             return Arrays.asList(0, set.size());
@@ -250,7 +274,7 @@ public class StrategyHelper {
         return Collections.emptyList();
     }
 
-    public TileRun shiftRun(TileRun set, Tile tile, Integer index) {
+    public static TileRun shiftRun(TileRun set, Tile tile, Integer index) {
         if (getShiftRunIndexes(set, tile).contains(index)) {
             set.add(index, tile);
             return set;
@@ -265,7 +289,7 @@ public class StrategyHelper {
      * @param tile
      * @return
      */
-    public List<Integer> getSplitRunIndexes(TileRun set, Tile tile) {
+    public static List<Integer> getSplitRunIndexes(TileRun set, Tile tile) {
         int setSize = set.size();
         if (tile.isJoker() && setSize >= 5) {
             List<Integer> indexes = new ArrayList<>();
@@ -285,7 +309,7 @@ public class StrategyHelper {
         return Collections.emptyList();
     }
 
-    public List<TileRun> splitRun(TileRun set, Tile tile, Integer index) {
+    public static List<TileRun> splitRun(TileRun set, Tile tile, Integer index) {
         if (getSplitRunIndexes(set, tile).contains(index)) {
             TileRun lowerTileRun = new TileRun(set.subList(0, index));
             TileRun upperTileRun = new TileRun(set.subList(index, set.size()));
@@ -302,7 +326,7 @@ public class StrategyHelper {
      * @param tile
      * @return
      */
-    public boolean canSubstituteInGroup(TileGroup set, Tile tile) {
+    public static boolean canSubstituteInGroup(TileGroup set, Tile tile) {
         if (set.size() >= 4) {
             return false;
         }
@@ -320,13 +344,139 @@ public class StrategyHelper {
         return true;
     }
 
-    public TileGroup substituteInGroup(TileGroup set, Tile tile) {
+    public static TileGroup substituteInGroup(TileGroup set, Tile tile) {
         if (canSubstituteInGroup(set, tile)) {
             set.add(tile);
         } else {
             throw new IllegalArgumentException(format("Tile %s can't substitute in TileGroup %s", tile, set));
         }
         return set;
+    }
+
+    /**
+     * This method returns a {@link Move} resulting from the given {@code List} of {@link Tile} {@code tiles}.
+     * 
+     * @param tiles
+     * @return
+     */
+    public static Move getTileRunMove(List<Tile> tiles) {
+        assert (tiles != null && tiles.size() >= 3);
+        Move move = new Move();
+        move.getTiles().addAll(tiles);
+        move.getToTileSets().add(new TileRun(tiles));
+        return move;
+    }
+
+    /**
+     * This method returns a {@link Move} resulting from adding the {@link Tile} {@code tile} to the given
+     * {@link TileRun} {@code fromTileRun}.
+     * 
+     * @param tileRun
+     * @param tile
+     * @return
+     */
+    public static Move getTileRunMove(TileRun tileRun, Tile tile) {
+        List<Tile> tiles = Arrays.asList(tile);
+        Move move = new Move();
+        move.setFromTileSet(new TileRun(tileRun));
+        move.getTiles().addAll(tiles);
+        List<Integer> shifts = getShiftRunIndexes(tileRun, tile);
+        List<Integer> splits = getSplitRunIndexes(tileRun, tile);
+        if (!shifts.isEmpty()) {
+            assert (splits.isEmpty() && shifts.size() == 1);
+            move.getToTileSets().add(shiftRun(tileRun, tile, shifts.get(0)));
+        } else if (!splits.isEmpty()) {
+            assert (splits.size() == 1);
+            move.getToTileSets().addAll(splitRun(tileRun, tile, splits.get(0)));
+        }
+        return move;
+    }
+
+    /**
+     * This method returns a {@link Move} resulting from adding the {@link Tile} {@code tile} to the given
+     * {@link TileRun} {@code fromTileRun}.
+     * 
+     * @param tileRun
+     * @param tile
+     * @return
+     */
+    public static Move getTileGroupMove(TileGroup tileGroup, Tile tile) {
+        Move move = new Move();
+        if (canSubstituteInGroup(tileGroup, tile)) {
+            List<Tile> tiles = Arrays.asList(tile);
+            move.setFromTileSet(new TileGroup(tileGroup));
+            move.getTiles().addAll(tiles);
+            move.getToTileSets().add(substituteInGroup(tileGroup, tile));
+        }
+        return move;
+    }
+
+    /**
+     * This method returns all the valid moves for the given {@link Table} and {@link Rack}
+     * 
+     * @param table
+     *            The {@link Table} containing the {@link List} of {@link TileSet}
+     * @param rack
+     *            The {@link Rack} containing the {@link List} of {@link Tile} for a specific player
+     * @return a {@link List} of valid {@link Move}
+     */
+    public static List<List<Move>> getValidMoveSets(Table table, Rack rack) {
+        assert (table != null);
+        assert (rack != null);
+
+        if (rack.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<List<Move>> validMoveSets = new ArrayList<>();
+        // I first add all the moves that can be made directly from what is seen in the rack
+        validMoveSets.addAll(getRunAndGroupMoveSets(rack));
+
+        // Then for all the move found I check whether I can some more move using the TileSet from the Table.
+        for (Tile tile : rack) {
+            List<Move> moves = new ArrayList<>();
+            for (TileSet tileSet : table) {
+                if (canAddToTileRun(tileSet, tile)) {
+                    getTileRunMove((TileRun) tileSet, tile);
+                } else if (canAddToTileGroup(tileSet, tile)) {
+                    getTileRunMove((TileRun) tileSet, tile);
+                }
+            }
+            if (!moves.isEmpty()) {
+                validMoveSets.add(moves);
+            }
+        }
+        return validMoveSets;
+    }
+
+    /**
+     * This method returns a List of Move containing all the possible {@link TileSet} available in the given
+     * {@link Rack}.<br/>
+     * We first take all the valid {@link TileSet} found in the {@link Rack}. Each one will be the "seed" of a valid
+     * {@link Move}. We then loop through the different {@link Tile} found in the player's {@link Rack} and see if any
+     * further {@link Move} are available, with that new {@link Tile} and {@link TileSet}
+     * 
+     * @param rack
+     *            The {@link Rack} containing the {@link List} of {@link Tile} for a specific user
+     * @return
+     */
+    public static List<List<Move>> getRunAndGroupMoveSets(Rack rack) {
+        List<TileSet> validTileSets = getValidTileSets(rack);
+        List<List<Move>> moveSets = new ArrayList<>(validTileSets.size());
+        for (TileSet validTileSet : validTileSets) {
+            // There is a set of Move for each of the valid TileSet.
+            List<Move> moves = new ArrayList<>();
+            moves.add(new Move(null, validTileSet, Arrays.asList(validTileSet)));
+            for (Tile tile : rack) {
+                if (canAddToTileRun(validTileSet, tile)) {
+                    moves.add(getTileRunMove((TileRun) validTileSet, tile));
+                } else if (canAddToTileGroup(validTileSet, tile)) {
+                    moves.add(getTileGroupMove((TileGroup) validTileSet, tile));
+                }
+            }
+            moveSets.add(moves);
+        }
+        return moveSets;
     }
 
 }
