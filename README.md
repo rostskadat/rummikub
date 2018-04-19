@@ -42,6 +42,3 @@ In our case Q(s, a) expected value of taking action a in state s.
 * [8] [Giraffe](https://drive.google.com/open?id=1Y-l5--nAR6YgXh91HzbSM6Y8HRXv12A9)
 
 
-
-
-
