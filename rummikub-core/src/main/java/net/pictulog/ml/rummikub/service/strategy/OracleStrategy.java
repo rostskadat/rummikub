@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import net.pictulog.ml.rummikub.algo.Negamax;
 import net.pictulog.ml.rummikub.model.Game;
-import net.pictulog.ml.rummikub.model.Move;
+import net.pictulog.ml.rummikub.model.MoveSet;
 import net.pictulog.ml.rummikub.model.Player;
 import net.pictulog.ml.rummikub.model.Pool;
 import net.pictulog.ml.rummikub.model.Rack;
@@ -78,7 +78,7 @@ public class OracleStrategy implements IStrategy {
 
     protected boolean playNormalRound(Player player) {
         Game game = new Game();
-        List<Move> moves = game.getPossibleMoves(player);
+        List<MoveSet> moves = game.getPossibleMoves(player);
         if (moves.size() == 1) {
             game.playMove(player, moves.get(0));
         } else {

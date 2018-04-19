@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.pictulog.ml.rummikub.model.Move;
+import net.pictulog.ml.rummikub.model.MoveSet;
 import net.pictulog.ml.rummikub.model.Rack;
 import net.pictulog.ml.rummikub.model.Table;
 import net.pictulog.ml.rummikub.model.Tile;
@@ -354,30 +354,30 @@ public class StrategyHelper {
     }
 
     /**
-     * This method returns a {@link Move} resulting from the given {@code List} of {@link Tile} {@code tiles}.
+     * This method returns a {@link MoveSet} resulting from the given {@code List} of {@link Tile} {@code tiles}.
      * 
      * @param tiles
      * @return
      */
-    public static Move getTileRunMove(List<Tile> tiles) {
+    public static MoveSet getTileRunMove(List<Tile> tiles) {
         assert (tiles != null && tiles.size() >= 3);
-        Move move = new Move();
+        MoveSet move = new MoveSet();
         move.getTiles().addAll(tiles);
         move.getToTileSets().add(new TileRun(tiles));
         return move;
     }
 
     /**
-     * This method returns a {@link Move} resulting from adding the {@link Tile} {@code tile} to the given
+     * This method returns a {@link MoveSet} resulting from adding the {@link Tile} {@code tile} to the given
      * {@link TileRun} {@code fromTileRun}.
      * 
      * @param tileRun
      * @param tile
      * @return
      */
-    public static Move getTileRunMove(TileRun tileRun, Tile tile) {
+    public static MoveSet getTileRunMove(TileRun tileRun, Tile tile) {
         List<Tile> tiles = Arrays.asList(tile);
-        Move move = new Move();
+        MoveSet move = new MoveSet();
         move.setFromTileSet(new TileRun(tileRun));
         move.getTiles().addAll(tiles);
         List<Integer> shifts = getShiftRunIndexes(tileRun, tile);
@@ -393,15 +393,15 @@ public class StrategyHelper {
     }
 
     /**
-     * This method returns a {@link Move} resulting from adding the {@link Tile} {@code tile} to the given
+     * This method returns a {@link MoveSet} resulting from adding the {@link Tile} {@code tile} to the given
      * {@link TileRun} {@code fromTileRun}.
      * 
      * @param tileRun
      * @param tile
      * @return
      */
-    public static Move getTileGroupMove(TileGroup tileGroup, Tile tile) {
-        Move move = new Move();
+    public static MoveSet getTileGroupMove(TileGroup tileGroup, Tile tile) {
+        MoveSet move = new MoveSet();
         if (canSubstituteInGroup(tileGroup, tile)) {
             List<Tile> tiles = Arrays.asList(tile);
             move.setFromTileSet(new TileGroup(tileGroup));
@@ -418,9 +418,9 @@ public class StrategyHelper {
      *            The {@link Table} containing the {@link List} of {@link TileSet}
      * @param rack
      *            The {@link Rack} containing the {@link List} of {@link Tile} for a specific player
-     * @return a {@link List} of valid {@link Move}
+     * @return a {@link List} of valid {@link MoveSet}
      */
-    public static List<List<Move>> getValidMoveSets(Table table, Rack rack) {
+    public static List<List<MoveSet>> getValidMoveSets(Table table, Rack rack) {
         assert (table != null);
         assert (rack != null);
 
@@ -428,13 +428,13 @@ public class StrategyHelper {
             return Collections.emptyList();
         }
 
-        List<List<Move>> validMoveSets = new ArrayList<>();
+        List<List<MoveSet>> validMoveSets = new ArrayList<>();
         // I first add all the moves that can be made directly from what is seen in the rack
         validMoveSets.addAll(getRunAndGroupMoveSets(rack));
 
         // Then for all the move found I check whether I can some more move using the TileSet from the Table.
         for (Tile tile : rack) {
-            List<Move> moves = new ArrayList<>();
+            List<MoveSet> moves = new ArrayList<>();
             for (TileSet tileSet : table) {
                 if (canAddToTileRun(tileSet, tile)) {
                     getTileRunMove((TileRun) tileSet, tile);
@@ -453,20 +453,20 @@ public class StrategyHelper {
      * This method returns a List of Move containing all the possible {@link TileSet} available in the given
      * {@link Rack}.<br/>
      * We first take all the valid {@link TileSet} found in the {@link Rack}. Each one will be the "seed" of a valid
-     * {@link Move}. We then loop through the different {@link Tile} found in the player's {@link Rack} and see if any
-     * further {@link Move} are available, with that new {@link Tile} and {@link TileSet}
+     * {@link MoveSet}. We then loop through the different {@link Tile} found in the player's {@link Rack} and see if any
+     * further {@link MoveSet} are available, with that new {@link Tile} and {@link TileSet}
      * 
      * @param rack
      *            The {@link Rack} containing the {@link List} of {@link Tile} for a specific user
      * @return
      */
-    public static List<List<Move>> getRunAndGroupMoveSets(Rack rack) {
+    public static List<List<MoveSet>> getRunAndGroupMoveSets(Rack rack) {
         List<TileSet> validTileSets = getValidTileSets(rack);
-        List<List<Move>> moveSets = new ArrayList<>(validTileSets.size());
+        List<List<MoveSet>> moveSets = new ArrayList<>(validTileSets.size());
         for (TileSet validTileSet : validTileSets) {
             // There is a set of Move for each of the valid TileSet.
-            List<Move> moves = new ArrayList<>();
-            moves.add(new Move(null, validTileSet, Arrays.asList(validTileSet)));
+            List<MoveSet> moves = new ArrayList<>();
+            moves.add(new MoveSet(null, validTileSet, Arrays.asList(validTileSet)));
             for (Tile tile : rack) {
                 if (canAddToTileRun(validTileSet, tile)) {
                     moves.add(getTileRunMove((TileRun) validTileSet, tile));

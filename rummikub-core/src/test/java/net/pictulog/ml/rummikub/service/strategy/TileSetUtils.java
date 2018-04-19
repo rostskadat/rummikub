@@ -39,6 +39,15 @@ public class TileSetUtils {
         return set;
     }
 
+    public static TileRun getTileRunWithJocker(int from, int to, TileColor color, Tile jocker, int jockerIndex) {
+        assert (from <= to);
+        TileRun set = new TileRun();
+        for (int i = to; i >= from; i--) {
+            addToSet(set, (i == jockerIndex) ? jocker : new Tile(i, color));
+        }
+        return set;
+    }
+
     public static TileGroup addTileGroup(Table table, int number, TileColor... colors) {
         TileGroup set = getTileGroup(number, colors);
         table.add(set);
@@ -55,8 +64,19 @@ public class TileSetUtils {
         TileGroup set = new TileGroup();
         // Make sure that the order is not important
         List<TileColor> list = Arrays.asList(colors);
-        Collections.reverse(list);
-        Collections.rotate(list, 2);
+        Collections.shuffle(list);
+        list.forEach(color -> {
+            addToSet(set, new Tile(number, color));
+        });
+        return set;
+    }
+
+    public static TileGroup getTileGroupWithJocker(int number, Tile jocker, TileColor... colors) {
+        TileGroup set = new TileGroup();
+        set.add(jocker);
+        // Make sure that the order is not important
+        List<TileColor> list = Arrays.asList(colors);
+        Collections.shuffle(list);
         list.forEach(color -> {
             addToSet(set, new Tile(number, color));
         });

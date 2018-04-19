@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.Data;
 
 /**
- * This class gather the after state of a {@link Move}.
+ * This class gather the after state of a {@link MoveSet}.
  * 
  * @author N090536
  *

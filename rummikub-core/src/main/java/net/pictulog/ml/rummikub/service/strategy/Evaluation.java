@@ -6,7 +6,7 @@ import org.w3c.dom.NodeList;
 public class Evaluation {
 
     /**
-     * Example of an Evaluation function expectiminimax
+     * Example of an Evaluation function expect minimax
      * 
      * @param node
      * @param depth
