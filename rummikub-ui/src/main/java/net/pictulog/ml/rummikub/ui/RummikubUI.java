@@ -12,11 +12,13 @@ import com.vaadin.navigator.PushStateNavigation;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
+import net.pictulog.ml.rummikub.model.Player;
 import net.pictulog.ml.rummikub.service.PlayerController;
 import net.pictulog.ml.rummikub.ui.view.HelpView;
 import net.pictulog.ml.rummikub.ui.view.PlaygroundView;
@@ -39,12 +41,12 @@ public class RummikubUI extends UI {
     private PlayerController playerController;
 
     public RummikubUI() {
-
+    	
     }
 
     @Override
     protected void init(VaadinRequest request) {
-
+    	LOG.info("Initilializing RummiKub UI");
         // Label title = new Label("Menu");
         // title.addStyleName(ValoTheme.MENU_TITLE);
 
@@ -56,12 +58,22 @@ public class RummikubUI extends UI {
                 e -> getNavigator().navigateTo(getViewName(HelpView.class)));
         Button button4 = new Button("Play 1 round!",
                 e -> playerController.play(1));
+        ComboBox<Player> comboBox = new ComboBox<>("Players");
+        comboBox.setItems(playerController.getPlayers());
+
+        comboBox.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                LOG.info("No player selected");
+            } else {
+            	LOG.info("Selected player: " + event.getValue());
+            }
+        });
 
         button1.addStyleNames(ValoTheme.BUTTON_LINK, ValoTheme.MENU_ITEM);
         button2.addStyleNames(ValoTheme.BUTTON_LINK, ValoTheme.MENU_ITEM);
         button3.addStyleNames(ValoTheme.BUTTON_LINK, ValoTheme.MENU_ITEM);
 
-        CssLayout menu = new CssLayout(button1, button2, button3, button4);
+        CssLayout menu = new CssLayout(button1, button2, button3, button4, comboBox);
         menu.addStyleName(ValoTheme.MENU_ROOT);
 
         CssLayout viewContainer = new CssLayout();

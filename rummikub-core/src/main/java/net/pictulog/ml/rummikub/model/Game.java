@@ -8,21 +8,21 @@ public class Game implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<MoveSet> moves = new ArrayList<>();
+    private List<Moves> moves = new ArrayList<>();
 
     public boolean isEnd() {
         return false;
     }
 
-    public void playMove(Player player, MoveSet move) {
+    public void playMove(Player player, Moves move) {
         moves.add(move);
     }
 
-    public void undoMove(Player player, MoveSet move) {
+    public void undoMove(Player player, Moves move) {
         moves.remove(moves.size() - 1);
     }
 
-    public List<MoveSet> getPossibleMoves(Player player) {
+    public List<Moves> getPossibleMoves(Player player) {
         return new ArrayList<>();
     }
 

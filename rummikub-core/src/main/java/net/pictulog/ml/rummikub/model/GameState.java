@@ -1,27 +1,26 @@
 package net.pictulog.ml.rummikub.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
 
 /**
- * This class gather the after state of a {@link MoveSet}.
+ * This class gather the after state of a {@link Moves}.
  * 
- * @author N090536
+ * @author rostskadat
  *
  */
 @Data
 public class GameState implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private List<Integer> drawnTileIndexes = new ArrayList<>();
+	private List<Integer> drawnTileIndexes;
 
-    private Table finalTable;
+	private Table finalTable;
 
-    private Pool finalPool;
+	private Pool finalPool;
 
-    private List<Player> finalPlayers = new ArrayList<>();
+	private List<Player> finalPlayers;
 }

@@ -36,12 +36,10 @@ public class PlaygroundView extends Composite implements View {
         hl.setComponentAlignment(table, Alignment.MIDDLE_CENTER);
         hl.setComponentAlignment(playerRight, Alignment.MIDDLE_RIGHT);
 
-        VerticalLayout playground = new VerticalLayout(playerTop, hl, playerBottom);
-        playground.setComponentAlignment(playerTop, Alignment.MIDDLE_CENTER);
-        playground.setComponentAlignment(hl, Alignment.MIDDLE_CENTER);
+        VerticalLayout playground = new VerticalLayout(table, playerBottom);
+        playground.setComponentAlignment(table, Alignment.MIDDLE_CENTER);
         playground.setComponentAlignment(playerBottom, Alignment.MIDDLE_CENTER);
         playground.setSizeFull();
-
         setCompositionRoot(playground);
     }
 

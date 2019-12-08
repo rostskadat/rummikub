@@ -59,7 +59,7 @@ public class PlayerController {
         LOG.debug("Drawing initial tiles...");
         for (Player player : players.keySet()) {
             for (int i = 0; i < numberOfTilesPerPlayer; i++) {
-                player.addTileToRack(poolController.drawTileFromPool());
+                player.addTileToRack(gameStateController.drawTile());
             }
         }
 
@@ -104,7 +104,7 @@ public class PlayerController {
                 hasPlayedInThisRound = true;
             } else {
                 if (poolController.getPoolSize() > 0) {
-                    player.getRack().add(poolController.drawTileFromPool());
+                    player.getRack().add(gameStateController.drawTile());
                 }
             }
         }

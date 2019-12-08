@@ -9,6 +9,12 @@ import org.springframework.stereotype.Controller;
 import net.pictulog.ml.rummikub.model.Table;
 import net.pictulog.ml.rummikub.model.TileSet;
 
+/**
+ * The {@code TableController} is in charge of the {@link Table}.
+ * 
+ * @author rostskadat
+ *
+ */
 @Controller
 public class TableController {
 

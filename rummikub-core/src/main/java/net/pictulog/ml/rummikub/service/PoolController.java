@@ -4,7 +4,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
@@ -12,60 +11,47 @@ import net.pictulog.ml.rummikub.model.Pool;
 import net.pictulog.ml.rummikub.model.Tile;
 import net.pictulog.ml.rummikub.model.TileColor;
 
+/**
+ * The {@code PoolController} is in charge of the {@link Pool} of {@link Tile}s
+ * 
+ * @author rostskadat
+ *
+ */
 @Controller
 public class PoolController {
 
-    private static final Log LOG = LogFactory.getLog(PoolController.class);
+	private static final Log LOG = LogFactory.getLog(PoolController.class);
 
-    @Value("${numberOfTilesPerColor:13}")
-    private int numberOfTilesPerColor;
+	@Value("${numberOfTilesPerColor:13}")
+	private int numberOfTilesPerColor;
 
-    private Pool pool;
+	private Pool pool;
 
-    @Autowired
-    private GameStateController gameStateController;
+	@PostConstruct
+	private void postConstruct() {
+		resetPool();
+	}
 
-    @PostConstruct
-    private void postConstruct() {
-        resetPool();
-    }
+	public int getPoolSize() {
+		return pool.size();
+	}
 
-    /**
-     * This method returns the next {@link Tile} from the pool. This {@link Tile} can be either drawn randomly or, when
-     * replaying a previously played game, drawn from the list of previously played {@link Tile}s.
-     * 
-     * @return the next {@link Tile} from the pool
-     */
-    public Tile drawTileFromPool() {
-        // I delegate to the game state controller in order to make sure that the tile are drawn in the same order as
-        // the previous game if I'm in replay mode
-        return gameStateController.getNextTile(pool);
-    }
+	public Pool getPool() {
+		return pool;
+	}
 
-    public Tile lookAhead(int offset) {
-        return gameStateController.lookAhead(pool, offset);
-    }
-
-    public int getPoolSize() {
-        return pool.size();
-    }
-
-    public Pool getPool() {
-        return pool;
-    }
-
-    public void resetPool() {
-        pool = new Pool();
-        LOG.debug("Creating tiles...");
-        for (TileColor color : TileColor.values()) {
-            for (int i = 1; i <= numberOfTilesPerColor; i++) {
-                // I add 2 tiles of each number / color
-                pool.add(new Tile(i, color));
-                pool.add(new Tile(i, color));
-            }
-        }
-        LOG.debug("Adding Jockers...");
-        pool.add(new Tile(TileColor.RED));
-        pool.add(new Tile(TileColor.BLACK));
-    }
+	public void resetPool() {
+		pool = new Pool();
+		LOG.debug("Creating tiles...");
+		for (TileColor color : TileColor.values()) {
+			for (int i = 1; i <= numberOfTilesPerColor; i++) {
+				// I add 2 tiles of each number / color
+				pool.add(new Tile(i, color));
+				pool.add(new Tile(i, color));
+			}
+		}
+		LOG.debug("Adding Jockers...");
+		pool.add(new Tile(TileColor.RED));
+		pool.add(new Tile(TileColor.BLACK));
+	}
 }

@@ -11,8 +11,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * A {@code Player} encapsulates the state of a physical player, and provides short hand methods to manipulate its
- * associated {@link Rack}.
+ * A {@code Player} encapsulates the state of a physical player, and provides
+ * short hand methods to manipulate its associated {@link Rack}.
  * 
  * @author rostskadat
  *
@@ -22,29 +22,45 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Player implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @NonNull
-    private String name;
+	@NonNull
+	private String name;
 
-    private Rack rack = new Rack();
+	private Rack rack = new Rack();
 
-    private boolean started = false;
+	private boolean started = false;
 
-    @JsonIgnore
-    public boolean isFinished() {
-        return rack.isEmpty();
-    }
+	@JsonIgnore
+	public boolean isFinished() {
+		return rack.isEmpty();
+	}
 
-    public void addTileToRack(Tile tile) {
-        rack.add(tile);
-    }
+	/**
+	 * This method adds a {@link Tile} to the {@code Player}'s {@link Rack}.
+	 * 
+	 * @param tile the {@link Tile} to add
+	 */
+	public void addTileToRack(Tile tile) {
+		rack.add(tile);
+	}
 
-    public void removeTileFromRack(Tile tile) {
-        rack.remove(tile);
-    }
+	/**
+	 * This method removes a {@link Tile} to the {@code Player}'s {@link Rack}.
+	 * 
+	 * @param tile the {@link Tile} to remove
+	 */
+	public void removeTileFromRack(Tile tile) {
+		rack.remove(tile);
+	}
 
-    public void removeAllTilesFromRack(List<Tile> tiles) {
-        rack.removeAll(tiles);
-    }
+	/**
+	 * This method removes all {@link Tile}s present in the list from the
+	 * {@code Player}'s {@link Rack}.
+	 * 
+	 * @param tiles the list of {@link Tile}s to remove
+	 */
+	public void removeAllTilesFromRack(List<Tile> tiles) {
+		rack.removeAll(tiles);
+	}
 }
