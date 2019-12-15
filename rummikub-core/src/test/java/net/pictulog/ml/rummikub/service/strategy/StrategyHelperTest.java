@@ -385,8 +385,7 @@ public class StrategyHelperTest extends AbstractUnitTest {
 
     @Test
     public void testGetTileRunMove_01() {
-        Moves moves = getMove(null, 1, 3, TileColor.BLACK);
-        Move move = moves.get(0);
+        Move move = getMove(null, 1, 3, TileColor.BLACK);
         assertThat(move, notNullValue());
         assertThat(move.getFromTileSet(), nullValue());
         assertThat(move.getTiles(), notNullValue());
@@ -400,8 +399,7 @@ public class StrategyHelperTest extends AbstractUnitTest {
 
     @Test
     public void testGetTileRunMove_02() {
-    	Moves moves = getMove(getTileRun(1, 5, TileColor.BLACK), 6, 6, TileColor.BLACK);
-        Move move = moves.get(0);
+        Move move = getMove(getTileRun(1, 5, TileColor.BLACK), 6, 6, TileColor.BLACK);
         assertThat(move, notNullValue());
         assertThat(move.getFromTileSet(), equalTo(getTileRun(1, 5, TileColor.BLACK)));
         assertThat(move.getTiles(), notNullValue());
@@ -415,8 +413,7 @@ public class StrategyHelperTest extends AbstractUnitTest {
 
     @Test
     public void testGetTileRunMove_03() {
-        Moves moves = getMove(getTileRun(1, 5, TileColor.BLACK), 3, 3, TileColor.BLACK);
-        Move move = moves.get(0);
+        Move move = getMove(getTileRun(1, 5, TileColor.BLACK), 3, 3, TileColor.BLACK);
         assertThat(move, notNullValue());
         assertThat(move.getFromTileSet(), equalTo(getTileRun(1, 5, TileColor.BLACK)));
         assertThat(move.getTiles(), notNullValue());
@@ -428,7 +425,16 @@ public class StrategyHelperTest extends AbstractUnitTest {
         assertThat(move.getToTileSets().get(1), equalTo(getTileRun(3, 5, TileColor.BLACK)));
     }
 
-    private Moves getMove(TileRun fromTileRun, int from, int to, TileColor color) {
+    /**
+     * This method returns a {@link Move} available from a given {@link TileRun}
+     * 
+     * @param fromTileRun
+     * @param from the lower limit of the {@link TileRun} to create
+     * @param to the upper limit of the {@link TileRun} to create
+     * @param color the {@link TileColor} of the {@link TileRun} to create
+     * @return the newly created {@link Move} 
+     */
+    private Move getMove(TileRun fromTileRun, int from, int to, TileColor color) {
         TileRun toTileRun = getTileRun(from, to, color);
         if (fromTileRun == null) {
             return getTileRunMove(toTileRun);
@@ -446,7 +452,7 @@ public class StrategyHelperTest extends AbstractUnitTest {
         addTileRun(rack, 3, 4, TileColor.BLACK);
         addTileRun(rack, 5, 5, TileColor.RED);
 
-        List<List<Moves>> movesList = getRunAndGroupMoves(rack);
+        List<Moves> movesList = getRunAndGroupMoves(rack);
         assertThat(movesList, notNullValue());
         assertThat(movesList.size(), equalTo(0));
 
@@ -480,40 +486,52 @@ public class StrategyHelperTest extends AbstractUnitTest {
         assertThat(movesList.size(), equalTo(0));
     }
 
-//    @Test
-//    public void testGetRunsAndGroups_02() {
-//        Rack rack = new Rack();
-//        TileRun exepcted1 = addTileRun(rack, 1, 3, TileColor.BLACK);
-//        addTileRun(rack, 4, 4, TileColor.RED);
-//        addTileRun(rack, 6, 6, TileColor.BLACK);
-//
-//        List<List<Moves>> movesList = getRunAndGroupMoves(rack);
-//        assertThat(movesList, notNullValue());
-//        assertThat(movesList.size(), equalTo(1));
-//        assertThat(movesList.get(0), notNullValue());
-//        assertThat(movesList.get(0).size(), equalTo(1));
-//        assertThat(movesList.get(0).get(0), equalTo(new Moves(null, exepcted1, Arrays.asList(exepcted1))));
-//
-//        addTileRun(rack, 4, 4, TileColor.BLACK);
-//        exepcted1.add(new Tile(4, TileColor.BLACK));
-//        movesList = getRunAndGroupMoves(rack);
-//        assertThat(movesList, notNullValue());
-//        assertThat(movesList.size(), equalTo(1));
-//        assertThat(movesList.get(0), notNullValue());
-//        assertThat(movesList.get(0).size(), equalTo(1));
-//        assertThat(movesList.get(0).get(0), equalTo(new Moves(null, exepcted1, Arrays.asList(exepcted1))));
-//
-//        addTileRun(rack, 4, 4, TileColor.BLUE);
-//        movesList = getRunAndGroupMoves(rack);
-//        assertThat(movesList, notNullValue());
-//        assertThat(movesList.size(), equalTo(2));
-//        assertThat(movesList.get(0), notNullValue());
-//        assertThat(movesList.get(0).size(), equalTo(1));
-//        assertThat(movesList.get(0).get(0), equalTo(new Moves(null, exepcted1, Arrays.asList(exepcted1))));
-//
-//        TileGroup expected2 = getTileGroup(4, TileColor.BLACK, TileColor.RED, TileColor.BLUE);
-//        assertThat(movesList.get(1), notNullValue());
-//        assertThat(movesList.get(1).size(), equalTo(1));
-//        assertThat(movesList.get(1).get(0), equalTo(new Moves(null, expected2, Arrays.asList(expected2))));
-//    }
+    /*
+     * Check the move case
+     */
+    @Test
+    public void testGetRunsAndGroups_02() {
+        Rack rack = new Rack();
+        TileRun expectedRun = addTileRun(rack, 1, 3, TileColor.BLACK);
+        rack.add(new Tile(4, TileColor.RED));
+        rack.add(new Tile(6, TileColor.BLACK));
+
+        List<Moves> movesList = getRunAndGroupMoves(rack);
+        assertThat(movesList, notNullValue());
+        assertThat(movesList.size(), equalTo(1));
+        assertThat(movesList.get(0), notNullValue());
+        assertThat(movesList.get(0), equalTo(getMoves(expectedRun)));
+
+        addTileRun(rack, 4, 4, TileColor.BLACK);
+        expectedRun.add(new Tile(4, TileColor.BLACK));
+        movesList = getRunAndGroupMoves(rack);
+        assertThat(movesList, notNullValue());
+        assertThat(movesList.size(), equalTo(1));
+        assertThat(movesList.get(0), notNullValue());
+        assertThat(movesList.get(0), equalTo(getMoves(expectedRun)));
+
+        addTileRun(rack, 4, 4, TileColor.BLUE);
+        movesList = getRunAndGroupMoves(rack);
+        assertThat(movesList, notNullValue());
+        assertThat(movesList.size(), equalTo(2));
+        assertThat(movesList.get(0), notNullValue());
+        assertThat(movesList.get(0), equalTo(getMoves(expectedRun)));
+
+        TileGroup expectedGroup = getTileGroup(4, TileColor.BLACK, TileColor.RED, TileColor.BLUE);
+        assertThat(movesList.get(0), equalTo(getMoves(expectedRun)));
+        assertThat(movesList.get(1), equalTo(getMoves(expectedGroup)));
+    }
+    
+    private Moves getMoves(TileSet...expectedTileSets) {
+        Moves expectedMoves = new Moves();
+        for (TileSet expectedTileSet : expectedTileSets) {
+            Move expectedMove = new Move();
+            expectedMove.getTiles().addAll(expectedTileSet);
+            expectedMove.getToTileSets().add(expectedTileSet);
+            expectedMoves.add(expectedMove);
+        }
+        return expectedMoves;
+    }
+
+    
 }

@@ -87,7 +87,7 @@ public class PlayerController {
             if (isGameBlocked(hasPlayedInThisRound)) {
                 LOG.warn(format("Game blocked on round %d", roundNumber));
             }
-            gameStateController.saveGameFinalState();
+            gameStateController.saveGame();
             getWinner();
         }
     }

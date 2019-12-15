@@ -24,6 +24,16 @@ public class TileSetUtils {
         return set;
     }
 
+    /**
+     * Add a {@link TileRun} from {@code from} lower limit to {@code to} upper 
+     * limit.
+     * 
+     * @param list the {@link Rack} to add the {@link Tile} to
+     * @param from the lower limit of the {@link TileRun}
+     * @param to the upper limit of the {@link TileRun}
+     * @param color the {@link TileColor} of the {@link TileRun}
+     * @return the newly created {@link TileRun}
+     */
     public static TileRun addTileRun(List<Tile> list, int from, int to, TileColor color) {
         TileRun set = getTileRun(from, to, color);
         list.addAll(set);

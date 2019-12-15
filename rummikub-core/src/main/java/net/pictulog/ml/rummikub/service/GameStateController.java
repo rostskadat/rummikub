@@ -20,6 +20,10 @@ import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+
+import lombok.Getter;
+import lombok.Setter;
+
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import net.pictulog.ml.rummikub.model.GameState;
@@ -41,10 +45,14 @@ public class GameStateController {
 	@Value("${useSavedGame}")
 	private boolean useSavedGame;
 
+	@Getter
+	@Setter
 	@Value("${gameStateFilename}")
 	private File gameStateFilename;
 
 	// The list of tiles to be drawn (from a previous game).
+	@Getter
+	@Setter
 	private List<Integer> tileIndexesFromPreviousGame;
 
 	// The list of tiles to be drawn (from a previous game).
@@ -69,13 +77,7 @@ public class GameStateController {
 		tileIndexesFromPreviousGame = new ArrayList<>();
 		drawnTileIndexes = new ArrayList<>();
 		if (useSavedGame) {
-			if (isValidGameSeed(gameStateFilename)) {
-				LOG.debug(format("Reading game state from %s...", gameStateFilename));
-				GameState gameState = readGameState();
-				tileIndexesFromPreviousGame.addAll(gameState.getDrawnTileIndexes());
-			} else {
-				LOG.warn(format("No game state found in %s", gameStateFilename));
-			}
+			restaureGame();
 		}
 	}
 
@@ -119,28 +121,36 @@ public class GameStateController {
 		return pool.get(nextTileIndex);
 	}
 
-	public void saveGameFinalState() {
-		if (useSavedGame) {
-			GameState gameState = new GameState();
-			gameState.setFinalPool(poolController.getPool());
-			gameState.setFinalTable(tableController.getTable());
-			gameState.setFinalPlayers(playerController.getPlayers());
-			gameState.setDrawnTileIndexes(drawnTileIndexes);
-			try {
-				writeGameState(gameStateFilename, gameState);
-			} catch (IOException e) {
-				LOG.error(e);
-			}
+	public void saveGame() {
+		GameState gameState = new GameState();
+		gameState.setFinalPool(poolController.getPool());
+		gameState.setFinalTable(tableController.getTable());
+		gameState.setFinalPlayers(playerController.getPlayers());
+		gameState.setDrawnTileIndexes(drawnTileIndexes);
+		try {
+			writeGameState(gameStateFilename, gameState);
+		} catch (IOException e) {
+			LOG.error(e);
 		}
+	}
+
+	public void restaureGame() {
+		if (isValidGameSeed(gameStateFilename)) {
+			LOG.debug(format("Restauring game state from %s...", gameStateFilename));
+			try {
+				GameState gameState = readGameState(gameStateFilename);
+				tileIndexesFromPreviousGame.addAll(gameState.getDrawnTileIndexes());
+			} catch (IOException e) {
+				throw new BeanCreationException(e.getMessage(), e);
+			}
+		} else {
+			LOG.warn(format("No game state found in %s", gameStateFilename));
+		}
+
 	}
 
 	private boolean isValidGameSeed(File file) {
 		return file.exists() && file.isFile() && file.canRead();
-	}
-
-	private GameState readGameState(File gameStateFilename) throws IOException {
-		return new ObjectMapper().enableDefaultTyping(DefaultTyping.NON_CONCRETE_AND_ARRAYS)
-				.readValue(gameStateFilename, GameState.class);
 	}
 
 	private void writeGameState(File gameStateFilename, GameState gameState) throws IOException {
@@ -152,20 +162,9 @@ public class GameStateController {
 				.enable(SerializationFeature.INDENT_OUTPUT).writeValue(gameStateFilename, gameState);
 	}
 
-	private GameState readGameState() {
-		try {
-			return readGameState(gameStateFilename);
-		} catch (IOException e) {
-			throw new BeanCreationException(e.getMessage(), e);
-		}
-	}
-
-	public List<Integer> getTilesFromPreviousGame() {
-		return tileIndexesFromPreviousGame;
-	}
-
-	public void setTilesFromPreviousGame(List<Integer> tileIndexesFromPreviousGame) {
-		this.tileIndexesFromPreviousGame = tileIndexesFromPreviousGame;
+	private GameState readGameState(File gameStateFilename) throws IOException {
+		return new ObjectMapper().enableDefaultTyping(DefaultTyping.NON_CONCRETE_AND_ARRAYS)
+				.readValue(gameStateFilename, GameState.class);
 	}
 
 }

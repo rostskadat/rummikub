@@ -29,6 +29,14 @@ public class Tile implements Serializable {
         this.joker = false;
     }
 
+    /**
+     * This constructor will create a special {@code Tile} called a Jocker. The
+     * Jocker does not have a specific value, but take its numerical value from 
+     * the other {@code Tile}s present in the {@link TileRun} or 
+     * {@link TileGroup} it is in.
+     * 
+     * @param color The {@link TileColor} of this Jocker
+     */
     public Tile(TileColor color) {
         super();
         this.number = null;

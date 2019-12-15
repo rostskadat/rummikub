@@ -48,5 +48,29 @@ public class Move implements Serializable {
 	 */
 	@NonNull
 	private List<TileSet> toTileSets = new ArrayList<TileSet>();
+	
+	@Override
+	public boolean equals(Object o) {
+		return (o != null && o instanceof Move && sameMove(this, (Move) o));
+	}
 
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
+	private static final boolean sameMove(Move m1, Move m2) {
+		if (m1.getFromTileSet() != m2.getFromTileSet() || (m1.getFromTileSet() != null && ! m1.getFromTileSet().equals(m2.getFromTileSet()))) {
+			return false;
+		}
+		if (! m1.getTiles().containsAll(m2.getTiles())) {
+			return false;
+		}
+		for (TileSet tileSet : m1.getToTileSets()) {
+			if (! m2.getToTileSets().contains(tileSet)) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

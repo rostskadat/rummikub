@@ -1,11 +1,16 @@
 package net.pictulog.ml.rummikub.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.annotations.JavaScript;
+import com.vaadin.annotations.StyleSheet;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.PushStateNavigation;
@@ -15,11 +20,16 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.ItemCaptionGenerator;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 
 import net.pictulog.ml.rummikub.model.Player;
+import net.pictulog.ml.rummikub.model.Tile;
 import net.pictulog.ml.rummikub.service.PlayerController;
+import net.pictulog.ml.rummikub.service.PoolController;
+import net.pictulog.ml.rummikub.ui.components.UiTile;
 import net.pictulog.ml.rummikub.ui.view.HelpView;
 import net.pictulog.ml.rummikub.ui.view.PlaygroundView;
 import net.pictulog.ml.rummikub.ui.view.SettingsView;
@@ -28,6 +38,10 @@ import net.pictulog.ml.rummikub.ui.view.SettingsView;
 @Theme("custom")
 @PushStateNavigation
 @SpringUI(path = "/rummikub")
+@JavaScript("https://code.jquery.com/jquery-3.4.1.slim.min.js")
+@JavaScript("https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js")
+@JavaScript("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js")
+@StyleSheet("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css")
 public class RummikubUI extends UI {
 
     private static final long serialVersionUID = 1L;
@@ -39,6 +53,9 @@ public class RummikubUI extends UI {
 
     @Autowired
     private PlayerController playerController;
+    
+    @Autowired
+    private PoolController poolController;
 
     public RummikubUI() {
     	
@@ -58,9 +75,15 @@ public class RummikubUI extends UI {
                 e -> getNavigator().navigateTo(getViewName(HelpView.class)));
         Button button4 = new Button("Play 1 round!",
                 e -> playerController.play(1));
-        ComboBox<Player> comboBox = new ComboBox<>("Players");
+        ComboBox<Player> comboBox = new ComboBox<>("View: ");
+        comboBox.setItemCaptionGenerator(new ItemCaptionGenerator<Player>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public String apply(Player item) {
+				return item.getName();
+			}
+		});
         comboBox.setItems(playerController.getPlayers());
-
         comboBox.addValueChangeListener(event -> {
             if (event.getSource().isEmpty()) {
                 LOG.info("No player selected");
@@ -69,6 +92,7 @@ public class RummikubUI extends UI {
             }
         });
 
+        
         button1.addStyleNames(ValoTheme.BUTTON_LINK, ValoTheme.MENU_ITEM);
         button2.addStyleNames(ValoTheme.BUTTON_LINK, ValoTheme.MENU_ITEM);
         button3.addStyleNames(ValoTheme.BUTTON_LINK, ValoTheme.MENU_ITEM);
@@ -84,8 +108,6 @@ public class RummikubUI extends UI {
 
         HorizontalLayout layout = new HorizontalLayout(menu, viewContainer);
         layout.setSizeFull();
-        layout.setExpandRatio(menu, .1f);
-        layout.setExpandRatio(viewContainer, .9f);
         setContent(layout);
         Navigator navigator = new Navigator(this, viewContainer);
         navigator.addView("", PlaygroundView.class);
@@ -105,5 +127,5 @@ public class RummikubUI extends UI {
     private String getViewName(Class<?> classz) {
         return classz.getSimpleName().toLowerCase().replace("view", "");
     }
-
+    
 }

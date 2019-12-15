@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
+import lombok.Getter;
 import net.pictulog.ml.rummikub.model.Pool;
 import net.pictulog.ml.rummikub.model.Tile;
 import net.pictulog.ml.rummikub.model.TileColor;
@@ -25,6 +26,7 @@ public class PoolController {
 	@Value("${numberOfTilesPerColor:13}")
 	private int numberOfTilesPerColor;
 
+	@Getter
 	private Pool pool;
 
 	@PostConstruct
@@ -34,10 +36,6 @@ public class PoolController {
 
 	public int getPoolSize() {
 		return pool.size();
-	}
-
-	public Pool getPool() {
-		return pool;
 	}
 
 	public void resetPool() {

@@ -1,46 +1,66 @@
 package net.pictulog.ml.rummikub.ui.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.vaadin.annotations.JavaScript;
+import com.vaadin.annotations.StyleSheet;
 import com.vaadin.navigator.View;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Composite;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+
+import net.pictulog.ml.rummikub.model.Tile;
+import net.pictulog.ml.rummikub.service.PlayerController;
+import net.pictulog.ml.rummikub.service.PoolController;
+import net.pictulog.ml.rummikub.service.TableController;
+import net.pictulog.ml.rummikub.ui.components.UiTile;
 
 public class PlaygroundView extends Composite implements View {
 
     private static final long serialVersionUID = 1L;
+    
+    @Autowired
+    TableController tableController;
+    
+    @Autowired
+    PlayerController playerController;
 
+    @Autowired
+    PoolController poolController;
+    
     public PlaygroundView() {
-        Label playerTop = new Label("playerTop");
-        playerTop.setSizeFull();
-        playerTop.setStyleName("player-top", true);
 
-        Label playerLeft = new Label("playerLeft");
-        playerLeft.setSizeFull();
-        playerLeft.setStyleName("player-left", true);
-        Label table = new Label("Table");
+        Label poolSize = new Label(String.valueOf(poolController.getPoolSize()));
+        List<UiTile> tiles = getTiles(poolController.getPool());
+    	
+    	
+        GridLayout table = new GridLayout();
         table.setSizeFull();
         table.setStyleName("table", true);
-        Label playerRight = new Label("playerRight");
-        playerRight.setSizeFull();
-        playerRight.setStyleName("player-right", true);
+        table.addComponents(tiles.toArray(new UiTile[] {}));
 
         Label playerBottom = new Label("You");
         playerBottom.setSizeFull();
         playerBottom.setStyleName("player-bottom", true);
-
-        HorizontalLayout hl = new HorizontalLayout(playerLeft, table, playerRight);
-        hl.setSizeFull();
-        hl.setComponentAlignment(playerLeft, Alignment.MIDDLE_LEFT);
-        hl.setComponentAlignment(table, Alignment.MIDDLE_CENTER);
-        hl.setComponentAlignment(playerRight, Alignment.MIDDLE_RIGHT);
 
         VerticalLayout playground = new VerticalLayout(table, playerBottom);
         playground.setComponentAlignment(table, Alignment.MIDDLE_CENTER);
         playground.setComponentAlignment(playerBottom, Alignment.MIDDLE_CENTER);
         playground.setSizeFull();
         setCompositionRoot(playground);
+    }
+
+    private List<UiTile> getTiles(List<Tile> tiles) {
+    	List<UiTile> uiTiles = new ArrayList<>();
+    	for (Tile tile : tiles) {
+    		uiTiles.add(new UiTile(tile));
+    	}
+    	return uiTiles;
     }
 
 }

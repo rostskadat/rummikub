@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.canSubstituteInGroup;
 import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.getInitialTileSets;
 import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.getShiftRunIndexes;
+import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.getSplitRunIndexes;
 import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.getValidTileSets;
 import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.shiftRun;
 import static net.pictulog.ml.rummikub.service.strategy.StrategyHelper.splitRun;
@@ -121,9 +122,8 @@ public class GreedyStrategy implements IStrategy {
 
 	private boolean playOneTile(Tile tile) {
 		// XXX: what is the best move? Take the first slot available or the one with the
-		// best future prospect? For
-		// instance runs are easier to play with than groups. If several options are
-		// valid how to select the best one?
+		// best future prospect? For instance runs are easier to play with than groups.
+		// If several options are valid how to select the best one?
 
 		Table table = new Table();
 		table.addAll(tableController.getTable());
@@ -132,7 +132,7 @@ public class GreedyStrategy implements IStrategy {
 			if (set instanceof TileRun) {
 				TileRun run = (TileRun) set;
 				List<Integer> shifts = getShiftRunIndexes(run, tile);
-				List<Integer> splits = getShiftRunIndexes(run, tile);
+				List<Integer> splits = getSplitRunIndexes(run, tile);
 				if (!shifts.isEmpty()) {
 					shiftRun(run, tile, shifts.get(0));
 					return true;
@@ -146,7 +146,7 @@ public class GreedyStrategy implements IStrategy {
 				TileGroup group = (TileGroup) set;
 				if (canSubstituteInGroup(group, tile)) {
 					// NA
-					LOG.warn("NOT IMPLEMENTED");
+					LOG.warn(format("STRATEGY NOT IMPLEMENTED: substitute %s is not implemented for group %s", tile, group));
 					return true;
 				}
 			}

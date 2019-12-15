@@ -359,33 +359,31 @@ public class StrategyHelper {
 	}
 
 	/**
-	 * This method returns a {@link Moves} resulting from the given {@code List} of
-	 * {@link Tile} {@code tiles}.
+	 * This method returns a {@link Move} resulting from the given {@link List} of
+	 * {@link Tile}
 	 * 
-	 * @param tiles
-	 * @return
+	 * @param tiles the {@link List} of {@link Tile} to create the {@link TileRun}
+	 *              from
+	 * @return the newly created {@link Move}
 	 */
-	public static Moves getTileRunMove(List<Tile> tiles) {
+	public static Move getTileRunMove(List<Tile> tiles) {
 		assert (tiles != null && tiles.size() >= 3);
-		Moves moves = new Moves();
 		Move move = new Move();
 		move.getTiles().addAll(tiles);
 		move.getToTileSets().add(new TileRun(tiles));
-		moves.add(move);
-		return moves;
+		return move;
 	}
 
 	/**
-	 * This method returns a {@link Moves} resulting from adding the {@link Tile}
-	 * {@code tile} to the given {@link TileRun} {@code fromTileRun}.
+	 * This method returns a {@link Move} resulting from adding the {@link Tile} to
+	 * the given {@link TileRun}.
 	 * 
-	 * @param tileRun
-	 * @param tile
-	 * @return
+	 * @param tileRun the {@link TileRun} to add the {@link Tile} to
+	 * @param tile    the {@link Tile} to add
+	 * @return the newly created {@link Move}
 	 */
-	public static Moves getTileRunMove(TileRun tileRun, Tile tile) {
+	public static Move getTileRunMove(TileRun tileRun, Tile tile) {
 		List<Tile> tiles = Arrays.asList(tile);
-		Moves moves = new Moves();
 		Move move = new Move();
 		move.setFromTileSet(new TileRun(tileRun));
 		move.getTiles().addAll(tiles);
@@ -398,13 +396,13 @@ public class StrategyHelper {
 			assert (splits.size() == 1);
 			move.getToTileSets().addAll(splitRun(tileRun, tile, splits.get(0)));
 		}
-		moves.add(move);
-		return moves;
+		return move;
 	}
 
 	/**
-	 * This method returns a {@link Moves} resulting from adding the {@link Tile}
-	 * {@code tile} to the given {@link TileRun} {@code fromTileRun}.
+	 * This method returns a {@link List} of {@link Move} resulting from adding the
+	 * given {@code tile} {@link Tile} to the given {@code tileGroup}
+	 * {@link TileRun} .
 	 * 
 	 * @param tileRun
 	 * @param tile
@@ -430,9 +428,9 @@ public class StrategyHelper {
 	 * @param table The {@link Table} containing the {@link List} of {@link TileSet}
 	 * @param rack  The {@link Rack} containing the {@link List} of {@link Tile} for
 	 *              a specific player
-	 * @return a {@link List} of valid {@link Moves}
+	 * @return a {@link List} of {@link Moves}
 	 */
-	public static List<List<Moves>> getValidMoves(Table table, Rack rack) {
+	public static List<Moves> getValidMoves(Table table, Rack rack) {
 		assert (table != null);
 		assert (rack != null);
 
@@ -440,7 +438,7 @@ public class StrategyHelper {
 			return Collections.emptyList();
 		}
 
-		List<List<Moves>> validMovesList = new ArrayList<>();
+		List<Moves> validMovesList = new ArrayList<>();
 		// I first add all the moves that can be made directly from what is seen in the
 		// rack
 		validMovesList.addAll(getRunAndGroupMoves(rack));
@@ -448,7 +446,7 @@ public class StrategyHelper {
 		// Then for all the move found I check whether I can some more move using the
 		// TileSet from the Table.
 		for (Tile tile : rack) {
-			List<Moves> moves = new ArrayList<>();
+			Moves moves = new Moves();
 			for (TileSet tileSet : table) {
 				if (canAddToTileRun(tileSet, tile)) {
 					getTileRunMove((TileRun) tileSet, tile);
@@ -464,30 +462,34 @@ public class StrategyHelper {
 	}
 
 	/**
-	 * This method returns a {@link Moves} containing all the possible
-	 * {@link TileSet} available in the given {@link Rack}.<br/>
+	 * This method returns a {@link List} of {@link Moves} containing all the
+	 * possible {@link TileSet} available in the given {@link Rack}.<br/>
 	 * We first take all the valid {@link TileSet} found in the {@link Rack}. Each
 	 * one will be the "seed" of a valid {@link Moves}. We then loop through the
 	 * different {@link Tile} found in the player's {@link Rack} and see if any
 	 * further {@link Moves} are available, with that new {@link Tile} and
-	 * {@link TileSet}
+	 * {@link TileSet}. <b>Note</b> that it does not actually remove the
+	 * {@link Tile}s from the {@link Rack}. This is left to the strategy (the object
+	 * that will actually pick the highest scored {@link Move})
 	 * 
-	 * @param rack The {@link Rack} containing the {@link List} of {@link Tile} for
-	 *             a specific user
-	 * @return
+	 * @param rack The {@link Rack} containing the {@link List} of {@link Tile}
+	 * @return a {@link List} of {@link Moves}
 	 */
-	public static List<List<Moves>> getRunAndGroupMoves(Rack rack) {
+	public static List<Moves> getRunAndGroupMoves(Rack rack) {
 		List<TileSet> validTileSets = getValidTileSets(rack);
-		List<List<Moves>> movesList = new ArrayList<>(validTileSets.size());
+		List<Moves> movesList = new ArrayList<>(validTileSets.size());
 		for (TileSet validTileSet : validTileSets) {
 			// There is a set of Move for each of the valid TileSet.
-			List<Moves> moves = new ArrayList<>();
-//			Moves.builder().player(player).moves.add(new Moves(null, validTileSet, Arrays.asList(validTileSet)));
+			Move validInitialMove = new Move();
+			validInitialMove.getTiles().addAll(validTileSet);
+			validInitialMove.getToTileSets().add(validTileSet);
+			Moves moves = new Moves();
+			moves.add(validInitialMove);
 			for (Tile tile : rack) {
 				if (canAddToTileRun(validTileSet, tile)) {
 					moves.add(getTileRunMove((TileRun) validTileSet, tile));
 				} else if (canAddToTileGroup(validTileSet, tile)) {
-					moves.add(getTileGroupMove((TileGroup) validTileSet, tile));
+					moves.addAll(getTileGroupMove((TileGroup) validTileSet, tile));
 				}
 			}
 			movesList.add(moves);
