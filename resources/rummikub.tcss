@@ -1,0 +1,71 @@
+Screen {
+    layout: vertical;
+}
+
+PoolWidget {
+    height: 5;
+    background: $panel;
+}
+
+PoolWidget > .pool-tiles {
+    height: 4;
+    border: round green;
+}
+
+PlayerWidget {
+    height: 8;
+    background: $panel;
+}
+
+PlayerWidget > .player-hand {
+    height: 7;
+    border: round green;
+}
+
+TableWidget {
+    height: 1fr;
+    background: $panel;
+}
+
+TableWidget > .table-melds {
+    height: 1fr;
+    background: $panel;
+    border: round green;
+}
+
+MeldWidget {
+    height: 1;
+    /*
+    width: 50%;
+    background: olive;
+    */
+}
+
+TileWidget {
+    height: 1;
+    width: 4;
+    color: purple;
+    background: blanchedalmond;
+}
+
+TileWidget.tile-red {
+    color: red;
+}
+
+TileWidget.tile-blue {
+    color: blue;
+}
+
+TileWidget.tile-orange {
+    color: orange;
+}
+
+TileWidget.tile-black {
+    color: black;
+}
+
+#status {
+    height: 1;
+    background: $panel;
+    padding-left: 1;
+}
